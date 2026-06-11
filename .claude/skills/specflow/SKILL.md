@@ -28,7 +28,6 @@ SpecFlow is a skill-first development protocol for coding agents. 它不是 Clau
 - `Requirement` / 需求 / 需求阶段
 - `Spec` / 规格 / 方案 / 规格阶段 / 方案阶段
 - `Plan` / 计划 / 计划阶段
-- `Scope note` / 范围说明 / 轻量范围 / scope 记录
 - `Implementation` / 实现 / 实施 / 开始实现 / 开发
 - `Verification` / 验证 / 验收 / 验证阶段
 
@@ -74,11 +73,11 @@ SpecFlow is a skill-first development protocol for coding agents. 它不是 Clau
 
 流程：
 
-1. Scope note / 范围说明
+1. Requirement / 需求
 2. Implementation / 实现
 3. Verification / 验证
 
-light / 轻量模式仍必须保留最小 scope note / 范围说明和 verification / 验证，避免变成无过程记录的直接实现。
+light / 轻量模式仍必须保留最小 requirement / 需求和 verification / 验证，避免变成无过程记录的直接实现。
 
 ## 文档位置
 
@@ -91,7 +90,7 @@ light / 轻量模式仍必须保留最小 scope note / 范围说明和 verificat
 
 同一功能的 requirement/spec/plan/verification 使用相同 `<yyyymmdd>-<feature>.md` 文件名，分别放在对应 stage 目录下。`<yyyymmdd>` 使用 8 位日期格式，例如 `20260609`；`<feature>` 用于表达需求或功能主题。
 
-standard / 标准模式可以不创建 `spec.md`。light / 轻量模式可以只创建最小 scope note / 范围说明和 `verification.md`；scope note 可以写在 `requirement.md` 中。
+standard / 标准模式可以不创建 `spec.md`。light / 轻量模式可以只创建最小 requirement / 需求和 `verification.md`；轻量需求仍写在 `docs/requirement/<yyyymmdd>-<feature>.md` 中。
 
 ## 文档隔离
 
@@ -117,7 +116,7 @@ standard / 标准模式可以不创建 `spec.md`。light / 轻量模式可以只
 
 ## 阶段流转规则
 
-- 始终告诉用户当前阶段和当前流程模式，优先使用“中文 + 英文”的形式，例如“当前：轻量模式 / light，范围说明 / Scope note”。
+- 始终告诉用户当前阶段和当前流程模式，优先使用“中文 + 英文”的形式，例如“当前：轻量模式 / light，需求 / Requirement”。
 - 默认聚焦当前阶段，直到用户接受或要求进入下一阶段。
 - 用户明确确认当前阶段时，将当前阶段文档 `Review status` 更新为 `Accepted`。
 - 用户明确要求进入后一阶段时，视为接受前一阶段；先将前一阶段文档 `Review status` 更新为 `Accepted`，再进入目标阶段。
@@ -127,14 +126,16 @@ standard / 标准模式可以不创建 `spec.md`。light / 轻量模式可以只
 
 ## Requirement / 需求阶段
 
-澄清要做什么和为什么做。
+澄清要做什么和为什么做。所有流程模式都使用 Requirement / 需求这一概念；light / 轻量模式只写短版需求，不向用户引入额外的阶段概念。
 
 职责：
 
 1. 创建或更新 `docs/requirement/<yyyymmdd>-<feature>.md`。
-2. 捕获 background、goals、non-goals、user scenarios、acceptance criteria、open questions、decisions 和 user review notes。
-3. 除非用户明确要求推进，否则不写 spec、plan 或产品代码。
-4. draft 完成后请求用户 review requirement；如果用户要求进入后一阶段，自动将 requirement 标记为 `Accepted`。
+2. strict / 严格模式和 standard / 标准模式捕获 background、goals、non-goals、user scenarios、acceptance criteria、open questions、decisions 和 user review notes。
+3. light / 轻量模式可以只记录目标、非目标、验收标准和风险/假设，但仍称为 Requirement / 需求。
+4. 除非用户明确要求推进，否则不写 spec、plan 或产品代码。
+5. draft 完成后请求用户 review requirement；如果用户要求进入后一阶段，自动将 requirement 标记为 `Accepted`。
+6. 向用户展示 requirement / 需求草稿时，除了总结已确认的需求，还必须显式提示仍需要用户关注的未决事项。这些事项包括但不限于：尚未确认的假设、影响方案选择的决策点、范围边界不清之处、验收标准中的模糊点、依赖外部条件的风险，以及可以继续推进但需要后续确认的问题。如果没有这类事项，应明确说明“暂无需要用户确认的未决事项”。
 
 ## Spec / 规格阶段
 
@@ -160,18 +161,7 @@ standard / 标准模式可以不创建 `spec.md`。light / 轻量模式可以只
 4. 如果前置 Requirement 或 Spec 不是 `Accepted`，但用户要求进入 Plan / 计划，则先将对应前置文档标记为 `Accepted`。
 5. 除非用户明确要求实现，否则不写产品代码。
 
-## Scope note / 范围说明阶段
-
-light / 轻量模式使用该阶段，用最小文档记录范围。
-
-职责：
-
-1. 创建或更新 `docs/requirement/<yyyymmdd>-<feature>.md`。
-2. 使用短版 scope note 即可，不必填完整 requirement 模板。
-3. 至少记录目标、非目标、验收标准和风险/假设。
-4. 如果用户要求开始实现，将 scope note / 范围说明标记为 `Accepted` 后进入 Implementation / 实现。
-
-light / 轻量模式推荐结构：
+light / 轻量模式推荐需求结构：
 
 ```markdown
 ## Goal
@@ -191,9 +181,9 @@ light / 轻量模式推荐结构：
 职责：
 
 1. 读取可用的 requirement/spec/plan 文档。
-2. 如果 Plan 缺失但当前是 light / 轻量模式，依据 scope note / 范围说明实现。
+2. 如果 Plan 缺失但当前是 light / 轻量模式，依据 requirement / 需求实现。
 3. 将实现范围限制在用户指令和已有文档约束内。
-4. 如果代码现实与 plan 或 scope note 冲突，报告冲突，并和用户一起更新过程文档，不要静默改变范围。
+4. 如果代码现实与 plan 或 requirement 冲突，报告冲突，并和用户一起更新过程文档，不要静默改变范围。
 
 ## Verification / 验证阶段
 

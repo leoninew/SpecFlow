@@ -8,7 +8,7 @@ Draft
 
 strict / 严格 / standard / 标准 / light / 轻量
 
-light / 轻量模式可使用短版 Scope note / 范围说明，只保留 Goal / 目标、Non-goal / 非目标、Acceptance / 验收、Risk / 风险。
+light / 轻量模式可使用短版 Requirement / 需求，只保留 Goal / 目标、Non-goal / 非目标、Acceptance / 验收、Risk / 风险。
 
 ## Background / 背景
 
