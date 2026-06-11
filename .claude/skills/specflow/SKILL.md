@@ -208,7 +208,11 @@ light / 轻量模式推荐结构：
 5. 尽可能运行或收集相关测试、lint、format 或项目约定命令结果；不要在通用协议中硬编码语言、框架或业务特定检查。
 6. 创建或更新 `docs/verification/<yyyymmdd>-<feature>.md`。
 7. strict / standard 模式记录 requirement alignment、spec alignment、plan alignment、actual diff summary、planned vs actual changed files、acceptance criteria checklist、test results、missed or expanded scope、risks、incomplete items 和 conclusion。
-8. light / 轻量模式可以使用短版 verification。
+8. 确认交付时，在最终屏幕输出中基于实际 diff 提供建议 git commit message，帮助用户审视交付边界；该建议不写入 `verification.md`，也不代表自动提交。
+9. 建议 git commit message 应是完整提交信息，不只是单行标题。除非用户明确要求 title-only，否则使用 fenced code block 输出，至少包含 subject、空行和 body；body 必须用列表形式输出，但应面向 git 历史说明本次提交的变更意图和影响，而不是复述 verification 过程；每条描述一个有意义的改动、行为变化、约束或兼容性影响。验证命令结果、验收清单、风险提示、未完成项或拆分建议应放在屏幕交付说明中，不写进建议 commit body。
+10. 除非用户明确授权，不执行 `git add`、`git commit`、`git push` 等 Git 写操作。
+11. 如果当前 diff 包含无关改动、验证失败或仍有 incomplete items，应在屏幕输出 commit 建议前明确说明风险，并建议用户先拆分或修复。
+12. light / 轻量模式可以使用短版 verification。
 
 light / 轻量模式推荐结构：
 
