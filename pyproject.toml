@@ -19,16 +19,13 @@ classifiers = [
     "Topic :: Software Development :: Documentation",
     "Topic :: Software Development :: Quality Assurance",
 ]
-dependencies = [
-    "click>=8.1",
-]
-
 
 [project.scripts]
 specflow = "specflow.cli:main"
 
-[dependency-groups]
+[project.optional-dependencies]
 dev = [
+    "build>=1.2",
     "pytest>=8.0",
 ]
 

@@ -18,9 +18,9 @@ SpecFlow 为 coding agent 提供轻量、可审查的软件变更流程。它定
 
 ## 安装
 
-SpecFlow 使用 [uv](https://docs.astral.sh/uv/) 并提供 Makefile。
+SpecFlow 使用标准 Python 打包工具，并提供 Makefile。
 
-安装依赖：
+安装包和开发依赖：
 
 ```bash
 make install
@@ -75,7 +75,19 @@ make test
 等价命令：
 
 ```bash
-uv run python -m pytest -q
+python -m pytest -q
+```
+
+构建 source 和 wheel distributions：
+
+```bash
+make build
+```
+
+等价命令：
+
+```bash
+python -m build
 ```
 
 ## 许可证

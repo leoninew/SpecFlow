@@ -18,9 +18,9 @@ Each mode keeps enough process record for humans and future agents to review wha
 
 ## Install
 
-SpecFlow uses [uv](https://docs.astral.sh/uv/) and provides a Makefile.
+SpecFlow uses standard Python packaging tools and provides a Makefile.
 
-Install dependencies:
+Install the package and development dependencies:
 
 ```bash
 make install
@@ -75,7 +75,19 @@ make test
 Equivalent command:
 
 ```bash
-uv run python -m pytest -q
+python -m pytest -q
+```
+
+Build source and wheel distributions:
+
+```bash
+make build
+```
+
+Equivalent command:
+
+```bash
+python -m build
 ```
 
 ## License

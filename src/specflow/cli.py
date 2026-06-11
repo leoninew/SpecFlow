@@ -1,23 +1,48 @@
+import argparse
+from collections.abc import Sequence
 from pathlib import Path
-
-import click
 
 PROTOCOL_FILES = ("requirement.md", "spec.md", "plan.md", "verification.md")
 PROTOCOL_STAGES = tuple(filename.removesuffix(".md") for filename in PROTOCOL_FILES)
 
 
-@click.group(
-    invoke_without_command=True,
-    context_settings={"help_option_names": ["-h", "--help"]},
-)
-@click.pass_context
-def main(ctx: click.Context) -> None:
+def main(argv: Sequence[str] | None = None) -> int:
     """SpecFlow: a skill-first development protocol for coding agents."""
-    if ctx.invoked_subcommand is None:
-        click.echo(ctx.get_help())
+    parser = _parser()
+    args = parser.parse_args(argv)
+
+    if args.command is None:
+        parser.print_help()
+        return 0
+
+    args.handler()
+    return 0
 
 
-@main.command()
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="specflow",
+        description="SpecFlow: a skill-first development protocol for coding agents.",
+    )
+    subparsers = parser.add_subparsers(dest="command", metavar="command")
+
+    init_parser = subparsers.add_parser(
+        "init",
+        help="Initialize project-local SpecFlow folders and templates.",
+        description="Initialize project-local SpecFlow folders and templates.",
+    )
+    init_parser.set_defaults(handler=init)
+
+    status_parser = subparsers.add_parser(
+        "status",
+        help="Show SpecFlow document status for each feature.",
+        description="Show SpecFlow document status for each feature.",
+    )
+    status_parser.set_defaults(handler=status)
+
+    return parser
+
+
 def init() -> None:
     """Initialize project-local SpecFlow folders and templates."""
     docs_dir = Path("docs")
@@ -31,26 +56,25 @@ def init() -> None:
         if not target.exists():
             target.write_text(_template(filename), encoding="utf-8")
 
-    click.echo("Initialized docs/ and .specflow/template/.")
+    print("Initialized docs/ and .specflow/template/.")
 
 
-@main.command()
 def status() -> None:
     """Show SpecFlow document status for each feature."""
     docs_dir = Path("docs")
     if not docs_dir.exists():
-        click.echo("No docs/ directory found. Run `specflow init` first.")
+        print("No docs/ directory found. Run `specflow init` first.")
         return
 
     features = _features(docs_dir)
     if not features:
-        click.echo("No SpecFlow feature documents found in docs/.")
+        print("No SpecFlow feature documents found in docs/.")
         return
 
     for feature_name, documents in features:
-        click.echo(f"docs/{feature_name}:")
+        print(f"docs/{feature_name}:")
         for stage in PROTOCOL_STAGES:
-            click.echo(f"  {stage:<12} {_document_status(documents.get(stage))}")
+            print(f"  {stage:<12} {_document_status(documents.get(stage))}")
 
 
 def _features(docs_dir: Path) -> list[tuple[str, dict[str, Path]]]:
@@ -137,3 +161,7 @@ def _review_status(content: str) -> str | None:
         return "unknown"
 
     return None
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
