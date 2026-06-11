@@ -1,106 +1,61 @@
 # SpecFlow
 
-SpecFlow is **a skill-first development protocol for coding agents**.
+**SpecFlow is a skill-first development protocol for coding agents.**
 
-它用于在现有 coding agent 工作流中提供低噪声、可审查的阶段边界。它不替代 Claude Code / Codex 的代码理解、规划、实现、测试或 review 能力；它只定义开发过程中的流程模式、阶段文档和 review 规则。
+[中文说明](README.zh-CN.md)
 
-## Skill 定义位置
+SpecFlow gives coding agents a lightweight, reviewable process for software changes. It defines stage boundaries and document conventions; it does not replace the agent runtime that reads code, edits files, runs tests, or performs reviews.
 
-本项目根目录就是 SpecFlow 项目根目录。
+## Flow modes
 
-Skill 和文档模板定义在：
+![SpecFlow development protocol flow models](docs/assets/specflow-flow-models.jpg)
 
-```text
-.claude/skills/specflow/SKILL.md
-.claude/skills/specflow/template/requirement.md
-.claude/skills/specflow/template/spec.md
-.claude/skills/specflow/template/plan.md
-.claude/skills/specflow/template/verification.md
-```
+- `strict`: for unclear, cross-module, or high-risk changes.
+- `standard`: for ordinary feature work.
+- `light`: for small, well-scoped changes.
 
-这些 Markdown 文件是 SpecFlow 协议的源文件。CLI 需要模板时读取这些文件，不再通过 Python 模块内嵌大段 Markdown。
+Each mode keeps enough process record for humans and future agents to review what changed and why.
 
-## 安装
+## Install
 
-使用 Makefile 安装本项目并覆盖同步 skill：
+SpecFlow uses [uv](https://docs.astral.sh/uv/) and provides a Makefile.
+
+Install dependencies:
 
 ```bash
 make install
 ```
 
-该命令会：
-
-1. 如果没有 `.venv`，先执行 `uv sync`。
-2. 执行 `pip install -e .`，以 editable mode 安装本项目。
-3. 覆盖同步 skill 和文档模板到用户目录：
-
-```text
-~/.claude/skills/specflow/SKILL.md
-~/.claude/skills/specflow/template/requirement.md
-~/.claude/skills/specflow/template/spec.md
-~/.claude/skills/specflow/template/plan.md
-~/.claude/skills/specflow/template/verification.md
-```
-
-## 核心定位
-
-SpecFlow 的用户入口是一个 skill，而不是一串 CLI 命令。
-
-用户通常这样开始：
-
-```text
-使用 specflow 帮我实现这个功能
-```
-
-而不是：
+Install the package in editable mode and sync the SpecFlow skill files to both `~/.claude/skills/specflow/` and `~/.codex/skills/specflow/`:
 
 ```bash
-specflow next
-specflow mark
-specflow approve
+make skill
 ```
 
-CLI 只用于初始化模板和诊断。
+## Use
 
-## 流程模式
-
-SpecFlow 根据任务大小支持三种模式。模式名支持中英双语：
-
-- `strict` / 严格 / 严格模式
-- `standard` / 标准 / 标准模式
-- `light` / 轻量 / 轻量模式
-
-### strict / 严格模式
-
-适合需求不清、跨模块、风险高、需要完整设计审查的变更。
+Use SpecFlow as a skill in your coding agent workflow:
 
 ```text
-Requirement → Spec → Plan → Implementation → Verification
+Use /specflow to start this requirement.
 ```
 
-### standard / 标准模式
+The skill chooses a flow mode, writes the relevant process documents, and asks for review when a stage needs acceptance.
 
-适合普通功能或中等复杂度变更。
+## CLI
 
-```text
-Requirement → Plan → Implementation → Verification
+The CLI is a setup and diagnostic helper for the skill, not the primary user interface:
+
+```bash
+specflow init
+specflow status
 ```
 
-### light / 轻量模式
+Users normally start from `/specflow`. SpecFlow intentionally avoids command-driven workflow transitions such as `next` or `approve`; the skill manages the process through normal agent work.
 
-适合范围明确的小修小改或简单 bugfix。
+## Documents
 
-```text
-Scope note → Implementation → Verification
-```
-
-light / 轻量模式仍必须保留最小 scope note / 范围说明和 verification / 验证，避免变成无过程记录的直接实现。
-
-light scope note 可以保持很短：目标、非目标、验收、风险。light verification 也可以保持很短：改了什么、验收对齐、命令结果、遗留风险。
-
-## 文档位置
-
-每个功能使用 feature-specific stage 目录文档：
+SpecFlow stores stage documents by feature:
 
 ```text
 docs/requirement/<yyyymmdd>-<feature>.md
@@ -109,154 +64,20 @@ docs/plan/<yyyymmdd>-<feature>.md
 docs/verification/<yyyymmdd>-<feature>.md
 ```
 
-同一功能的 requirement/spec/plan/verification 使用相同 `<yyyymmdd>-<feature>.md` 文件名，分别放在对应 stage 目录下。`<yyyymmdd>` 使用 8 位日期格式，例如 `20260609`。
+New documents use only two review states: `Draft` and `Accepted`.
 
-standard / 标准模式可以不创建 `spec.md`。light / 轻量模式可以只创建最小 scope note / 范围说明和 `verification.md`；scope note 可以写在 `requirement.md` 中。
-
-SpecFlow 包自身的改造文档同样使用该规则，例如：
-
-```text
-docs/requirement/20260609-specflow-skill-first-protocol.md
-docs/spec/20260609-specflow-skill-first-protocol.md
-```
-
-## 文档隔离
-
-用户表达“新需求”、“开始需求”、“新任务”、“新 feature”或类似语义时，默认创建新的 `docs/requirement/<yyyymmdd>-<feature>.md` 文档。
-
-不要修改相邻、同名相近或历史 feature 文档，除非用户明确说沿用、更新现有需求、继续上次，或修改指定过程文档。
-
-## Review status
-
-阶段文档使用简单的 Markdown 状态：
-
-```markdown
-## Review status
-
-Draft
-```
-
-只使用两种状态：
-
-- `Draft`：阶段内容仍在形成中，或尚未被用户接受。
-- `Accepted`：用户已接受该阶段内容，或用户明确要求进入后一阶段。
-
-新文档只写 `Draft` 或 `Accepted`。历史文档可能出现 `Approved`，可以按已接受理解，但不需要主动迁移或清理。
-
-不要新增 `Blocked`、`Completed`、`Proceeded with assumptions` 等状态。风险、假设、阻塞项应写进对应章节。
-
-## 阶段流转
-
-用户明确确认当前阶段时，skill 将当前阶段文档标记为 `Accepted`。
-
-用户明确要求进入后一阶段时，也视为接受前一阶段。例如：
-
-```text
-进入 spec
-开始 plan
-开始实现
-继续下一阶段
-```
-
-skill 应先将前一阶段标记为 `Accepted`，再进入目标阶段。
-
-如果前置阶段存在 open questions、risks 或 assumptions，但用户仍要求继续，skill 应记录这些事项并继续，不要反复要求用户确认。
-
-## Verification
-
-Verification 是每种模式都必须保留的阶段。
-
-通用 verification 应检查：
-
-- requirement / spec / plan alignment
-- actual diff summary
-- planned vs actual changed files
-- acceptance criteria checklist
-- test / command results
-- missed or expanded scope
-- risks
-- incomplete items
-- conclusion
-
-运行命令前应先识别当前项目开发语言、工具链，优先使用 README、Makefile、package scripts、CI 配置或项目已有测试/lint/format 命令。
-
-确认交付时，Verification 的最终屏幕输出可以基于实际 diff 提供建议 git commit message，帮助用户审视交付边界。该建议应是完整提交信息，不只是单行标题：除非用户明确要求 title-only，否则至少包含 subject、空行和 body；body 必须用列表形式输出，但应面向 git 历史说明本次提交的变更意图和影响，而不是复述 verification 过程；每条描述一个有意义的改动、行为变化、约束或兼容性影响。验证命令结果、验收清单、风险提示、未完成项或拆分建议应放在屏幕交付说明中，不写进建议 commit body。该建议不写入 `verification.md`，也不代表自动提交；除非用户明确授权，不执行 `git add`、`git commit`、`git push` 等 Git 写操作。若当前 diff 包含无关改动、验证失败或仍有 incomplete items，应先说明风险，并建议拆分或修复。
-
-不要在通用协议中硬编码语言、框架或业务特定检查；这些应由具体项目的测试、lint、format、review 或用户要求决定。
-
-## CLI
-
-CLI 是 setup 和 diagnostic support，不是主工作流，也不负责安装 skill。
-
-### `specflow init`
-
-初始化项目级 SpecFlow 文档模板：
+## Development
 
 ```bash
-specflow init
+make test
 ```
 
-创建：
-
-```text
-docs/
-.specflow/template/
-```
-
-并写入默认文档模板。
-
-### `specflow status`
-
-诊断 `docs/<stage>/<yyyymmdd>-<feature>.md` 过程文档：
+Equivalent command:
 
 ```bash
-specflow status
+uv run python -m pytest -q
 ```
 
-示例输出：
+## License
 
-```text
-docs/20260609-specflow-rename:
-  requirement   Accepted
-  spec          Draft
-  plan          missing
-  verification  missing
-```
-
-`status` 只显示文档存在性和 review status，不输出 next step，也不推进流程。
-
-## 不向后兼容
-
-SpecFlow 新模型直接替换旧的三 skill 模型：
-
-```text
-architect.md
-implement.md
-review.md
-```
-
-不提供旧模型兼容逻辑。
-
-## 不做什么
-
-SpecFlow 不做：
-
-- Agent Runtime
-- Workflow Engine
-- 持久状态机
-- 任务数据库
-- 项目管理系统
-- 用户手动驱动的一串 CLI 流程
-- skill 内部频繁调用 CLI 的隐藏流程
-
-不应新增或推荐以下命令：
-
-```text
-specflow next
-specflow mark
-specflow approve
-specflow enter-stage
-specflow create-stage
-specflow workflow
-specflow run
-```
+SpecFlow is released under the [MIT License](LICENSE).
