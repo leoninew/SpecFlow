@@ -34,13 +34,73 @@ make skill
 
 ## Use
 
-Use SpecFlow as a skill in your coding agent workflow:
+SpecFlow's primary interface is the coding-agent skill, such as `/specflow` in Claude Code, not the CLI. The CLI is only for setup and diagnostics.
+
+When a conversation is ready to become a tracked software change, tell the agent which flow mode to use and which stage to start from.
+
+### Choose a flow mode
+
+- `strict`: for unclear requirements, cross-module work, or high-risk changes. Flow: Requirement → Spec → Plan → Implementation → Verification.
+- `standard`: for ordinary feature work. Flow: Requirement → Plan → Implementation → Verification.
+- `light`: for small, clearly scoped changes. Flow: Requirement → Implementation → Verification.
+
+Light mode still keeps minimal Requirement and Verification records, so the work does not become undocumented direct coding.
+
+### Start the flow
+
+Discuss the requirement with the agent first. Clarify the goal, constraints, examples, and edge cases in normal conversation. When you are ready to enter the flow, invoke `/specflow`. The agent creates or updates the stage document and asks you to review it. Stage documents use two states: `Draft` and `Accepted`.
+
+Start strict mode from Requirement:
 
 ```text
-Use /specflow to start this requirement.
+Use /specflow strict: keep log files for 7 days, start Requirement.
 ```
 
-The skill chooses a flow mode, writes the relevant process documents, and asks for review when a stage needs acceptance.
+Start standard mode from Requirement:
+
+```text
+Use /specflow standard: add report export, start Requirement.
+```
+
+Start light mode for a small, clearly scoped change from Requirement:
+
+```text
+Use /specflow light: make all modal dialogs use the same Cancel and Confirm button order, start Requirement.
+```
+
+During the Requirement stage, if there are assumptions, risks, or open questions, the agent lists them in the stage document and in its reply. If you still ask to continue, SpecFlow records them as risks or assumptions and moves to the target stage.
+
+### Move through stages
+
+During review, reply naturally. You do not need command-style transitions like `next` or `approve`; just say what should change, or which stage you want to enter.
+
+Accept the current requirement and start Spec:
+
+```text
+Looks good, start Spec.
+```
+
+Accept the current requirement and start Plan:
+
+```text
+Accepted, start Plan.
+```
+
+Accept the prerequisite stage, enter Implementation, and keep the work within the accepted scope:
+
+```text
+Confirmed, start Implementation.
+```
+
+### Handoff
+
+After implementation is done, ask the agent to enter Verification:
+
+```text
+Looks good, start Verification.
+```
+
+SpecFlow does not automatically run `git add`, `git commit`, or `git push`.
 
 ## CLI
 
@@ -51,7 +111,7 @@ specflow init
 specflow status
 ```
 
-Users normally start from `/specflow`. SpecFlow intentionally avoids command-driven workflow transitions such as `next` or `approve`; the skill manages the process through normal agent work.
+For normal feature work, start from `/specflow`; use the CLI only for setup and status diagnostics.
 
 ## Documents
 
@@ -72,22 +132,10 @@ New documents use only two review states: `Draft` and `Accepted`.
 make test
 ```
 
-Equivalent command:
-
-```bash
-python -m pytest -q
-```
-
 Build source and wheel distributions:
 
 ```bash
 make build
-```
-
-Equivalent command:
-
-```bash
-python -m build
 ```
 
 ## License

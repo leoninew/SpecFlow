@@ -22,7 +22,7 @@ strict / 严格模式填写；standard/light / 标准/轻量模式可填写“�
 
 ## Plan alignment / 计划对齐
 
-strict/standard / 严格/标准模式填写；light / 轻量模式可对照 Scope note / 范围说明。
+strict/standard / 严格/标准模式填写；light / 轻量模式可对照 Requirement / 需求。
 
 -
 

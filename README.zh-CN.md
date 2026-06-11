@@ -10,9 +10,9 @@ SpecFlow 为 coding agent 提供轻量、可审查的软件变更流程。它定
 
 ![SpecFlow 开发流程模式](docs/assets/specflow-flow-models.jpg)
 
-- `strict` / 严格：适合需求不清、跨模块或高风险变更。
-- `standard` / 标准：适合普通功能开发。
-- `light` / 轻量：适合范围明确的小改动。
+- 严格：适合需求不清、跨模块或高风险变更。
+- 标准：适合普通功能开发。
+- 轻量：适合范围明确的小改动。
 
 每种模式都保留足够的过程记录，方便人类和后续 agent 审查“改了什么”和“为什么改”。
 
@@ -34,13 +34,73 @@ make skill
 
 ## 使用
 
-在 coding agent 工作流中作为 skill 使用：
+SpecFlow 的主要入口是 coding agent 的 skill（例如 Claude Code 中的 `/specflow`），不是 CLI。CLI 只用于初始化和诊断。
+
+当一段讨论已经准备进入可追踪的软件变更时，告诉 agent：使用哪个流程模式，以及从哪个阶段开始。
+
+### 选择流程模式
+
+- 严格：适合需求不清、跨模块或高风险变更。流程为：需求 → 规格 → 计划 → 实现 → 验证。
+- 标准：适合普通功能开发。流程为：需求 → 计划 → 实现 → 验证。
+- 轻量：适合范围明确的小改动。流程为：需求 → 实现 → 验证。
+
+轻量模式也会保留最小需求和验证，避免变成没有过程记录的直接改代码。
+
+### 启动方式
+
+先用自然语言和 agent 讨论需求，澄清目标、约束、示例和边界情况。准备进入流程时，再启动 `/specflow`。agent 会创建或更新对应阶段文档，请你审查。阶段文档使用 `Draft` 和 `Accepted` 两种状态。
+
+启动严格模式，并从需求开始：
 
 ```text
-使用 /specflow 开始这个需求。
+使用 /specflow 严格模式：为日志文件保留 7 天，开始 Requirement。
 ```
 
-skill 会选择流程模式，写入相关过程文档，并在阶段需要接受时请求 review。
+启动标准模式，并从需求开始：
+
+```text
+使用 /specflow 标准模式：新增导出报表功能，开始 Requirement。
+```
+
+启动轻量模式，处理范围明确的小改动，并从需求开始：
+
+```text
+使用 /specflow 轻量模式：统一所有模态窗的取消和确认按钮顺序，开始 Requirement。
+```
+
+在需求阶段，如果仍有假设、风险或未决问题，agent 会在阶段文档和回复中明确列出。只要你仍然要求继续，SpecFlow 会把这些内容记录为风险或假设，然后推进到目标阶段。
+
+### 推进阶段
+
+审查时直接用自然语言回复即可。你不需要输入 `next`、`approve` 这类命令式跳转；只要说明要调整什么，或要进入哪个阶段。
+
+接受当前需求，并开始规格：
+
+```text
+可以，开始 Spec。
+```
+
+接受当前需求，并开始计划：
+
+```text
+接受，开始 Plan。
+```
+
+接受前置阶段，进入实现，并在已接受范围内完成改动：
+
+```text
+确认，开始 Implementation。
+```
+
+### 交付阶段
+
+实现完成后，可以要求 agent 进入 Verification：
+
+```text
+没有问题，开始 Verification。
+```
+
+SpecFlow 不会自动执行 `git add`、`git commit` 或 `git push`。
 
 ## CLI
 
@@ -51,7 +111,7 @@ specflow init
 specflow status
 ```
 
-用户通常从 `/specflow` 开始。SpecFlow 有意避免 `next`、`approve` 这类命令驱动的流程跳转；流程由 skill 结合 agent 的正常工作完成。
+普通功能开发通常从 `/specflow` 开始；CLI 只用于初始化和状态诊断。
 
 ## 文档
 
@@ -72,22 +132,10 @@ docs/verification/<yyyymmdd>-<feature>.md
 make test
 ```
 
-等价命令：
-
-```bash
-python -m pytest -q
-```
-
 构建 source 和 wheel distributions：
 
 ```bash
 make build
-```
-
-等价命令：
-
-```bash
-python -m build
 ```
 
 ## 许可证
