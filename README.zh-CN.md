@@ -29,7 +29,7 @@ make install
 以 editable mode 安装包，并将 SpecFlow skill 文件同步到 `~/.claude/skills/specflow/` 和 `~/.codex/skills/specflow/`：
 
 ```bash
-make skill
+make release
 ```
 
 ## 使用
@@ -44,7 +44,7 @@ SpecFlow 的主要入口是 coding agent 的 skill（例如 Claude Code 中的 `
 - 标准：适合普通功能开发。流程为：需求 → 计划 → 实现 → 验证。
 - 轻量：适合范围明确的小改动。流程为：需求 → 实现 → 验证。
 
-轻量模式也会保留最小需求和验证，避免变成没有过程记录的直接改代码。
+轻量模式也会保留经过适中澄清的需求和验证，避免变成没有过程记录的直接改代码。
 
 ### 启动方式
 
@@ -68,7 +68,7 @@ SpecFlow 的主要入口是 coding agent 的 skill（例如 Claude Code 中的 `
 使用 /specflow 轻量模式：统一所有模态窗的取消和确认按钮顺序，开始 Requirement。
 ```
 
-在需求阶段，如果仍有假设、风险或未决问题，agent 会在阶段文档和回复中明确列出。只要你仍然要求继续，SpecFlow 会把这些内容记录为风险或假设，然后推进到目标阶段。
+在需求阶段，如果仍有假设、风险或未决问题，agent 会在阶段文档和回复中明确列出。只要你仍然要求继续，SpecFlow 会把这些内容记录为风险或假设，然后推进到目标阶段。启动 light / 轻量模式并从 Requirement / 需求开始时，agent 只应创建或更新需求草稿并请求审查；除非你明确要求“实现并验证”或“跑完整个 light 流程”，否则不会在同一轮直接实现和验证。
 
 ### 推进阶段
 

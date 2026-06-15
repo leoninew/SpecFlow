@@ -29,7 +29,7 @@ make install
 Install the package in editable mode and sync the SpecFlow skill files to both `~/.claude/skills/specflow/` and `~/.codex/skills/specflow/`:
 
 ```bash
-make skill
+make release
 ```
 
 ## Use
@@ -44,7 +44,7 @@ When a conversation is ready to become a tracked software change, tell the agent
 - `standard`: for ordinary feature work. Flow: Requirement → Plan → Implementation → Verification.
 - `light`: for small, clearly scoped changes. Flow: Requirement → Implementation → Verification.
 
-Light mode still keeps minimal Requirement and Verification records, so the work does not become undocumented direct coding.
+Light mode still keeps moderately clarified Requirement and Verification records, so the work does not become undocumented direct coding.
 
 ### Start the flow
 
@@ -68,7 +68,7 @@ Start light mode for a small, clearly scoped change from Requirement:
 Use /specflow light: make all modal dialogs use the same Cancel and Confirm button order, start Requirement.
 ```
 
-During the Requirement stage, if there are assumptions, risks, or open questions, the agent lists them in the stage document and in its reply. If you still ask to continue, SpecFlow records them as risks or assumptions and moves to the target stage.
+During the Requirement stage, if there are assumptions, risks, or open questions, the agent lists them in the stage document and in its reply. If you still ask to continue, SpecFlow records them as risks or assumptions and moves to the target stage. When starting light mode from Requirement, the agent should only create or update the requirement draft and ask for review; it should not implement and verify in the same turn unless you explicitly ask to "implement and verify" or "run the full light flow."
 
 ### Move through stages
 
