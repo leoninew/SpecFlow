@@ -40,7 +40,7 @@ strict/standard / 严格/标准模式填写；light / 轻量模式可对照 Requ
 
 ## Test / command results / 测试 / 命令结果
 
-先识别项目开发语言、工具链，优先使用 README、Makefile、package scripts、CI 配置或项目已有测试/lint/format 命令。
+先识别项目开发语言、工具链，优先使用 README、justfile、Makefile、package scripts、CI 配置或项目已有测试/lint/format 命令。
 
 -
 

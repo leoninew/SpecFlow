@@ -207,7 +207,7 @@ light / 轻量模式推荐需求结构：
 1. 读取可用的 requirement/spec/plan 文档。
 2. 对照实际 diff 检查计划范围与实际改动是否一致。
 3. 运行命令前先识别当前项目开发语言、工具链，不要预设所有项目都是 Python、uv、Node 或某种固定栈。
-4. 优先使用项目显式入口：README、Makefile、package scripts、CI 配置、语言专用配置或已有测试/lint/format 命令。
+4. 优先使用项目显式入口：README、justfile、Makefile、package scripts、CI 配置、语言专用配置或已有测试/lint/format 命令。
 5. 尽可能运行或收集相关测试、lint、format 或项目约定命令结果；不要在通用协议中硬编码语言、框架或业务特定检查。
 6. 创建或更新 `docs/verification/<yyyymmdd>-<feature>.md`。
 7. strict / standard 模式记录 requirement alignment、spec alignment、plan alignment、actual diff summary、planned vs actual changed files、acceptance criteria checklist、test results、missed or expanded scope、risks、incomplete items 和 conclusion。

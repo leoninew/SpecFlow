@@ -23,10 +23,11 @@ classifiers = [
 [project.scripts]
 specflow = "specflow.cli:main"
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
-    "build>=1.2",
-    "pytest>=8.0",
+    "ruff>=0.15.17",
+    "mypy>=2.1.0",
+    "pytest>=9.0.2",
 ]
 
 [build-system]
