@@ -12,7 +12,9 @@ def test_help_options_show_help(capsys: pytest.CaptureFixture[str]) -> None:
 
         assert error.value.code == 0
         output = capsys.readouterr().out
-        assert "SpecFlow: a skill-first development protocol for coding agents." in output
+        assert (
+            "SpecFlow: a skill-first development protocol for coding agents." in output
+        )
         assert "init" in output
         assert "status" in output
 

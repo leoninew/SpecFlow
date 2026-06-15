@@ -125,7 +125,14 @@ def _flat_document(path: Path) -> tuple[str, str] | None:
 
 
 def _template(filename: str) -> str:
-    path = Path(__file__).resolve().parents[2] / ".claude" / "skills" / "specflow" / "template" / filename
+    path = (
+        Path(__file__).resolve().parents[2]
+        / ".claude"
+        / "skills"
+        / "specflow"
+        / "template"
+        / filename
+    )
     return path.read_text(encoding="utf-8")
 
 
