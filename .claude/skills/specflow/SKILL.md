@@ -77,7 +77,7 @@ SpecFlow is a skill-first development protocol for coding agents. 它不是 Clau
 2. Implementation / 实现
 3. Verification / 验证
 
-light / 轻量模式仍必须保留最小 requirement / 需求和 verification / 验证，避免变成无过程记录的直接实现。
+light / 轻量模式仍必须保留经过适中澄清的 requirement / 需求和 verification / 验证，避免变成无过程记录的直接实现。
 
 ## 文档位置
 
@@ -90,7 +90,7 @@ light / 轻量模式仍必须保留最小 requirement / 需求和 verification /
 
 同一功能的 requirement/spec/plan/verification 使用相同 `<yyyymmdd>-<feature>.md` 文件名，分别放在对应 stage 目录下。`<yyyymmdd>` 使用 8 位日期格式，例如 `20260609`；`<feature>` 用于表达需求或功能主题。
 
-standard / 标准模式可以不创建 `spec.md`。light / 轻量模式可以只创建最小 requirement / 需求和 `verification.md`；轻量需求仍写在 `docs/requirement/<yyyymmdd>-<feature>.md` 中。
+standard / 标准模式可以不创建 `spec.md`。light / 轻量模式可以只创建经过适中澄清的 requirement / 需求和 `verification.md`；轻量需求仍写在 `docs/requirement/<yyyymmdd>-<feature>.md` 中。
 
 ## 文档隔离
 
@@ -123,16 +123,19 @@ standard / 标准模式可以不创建 `spec.md`。light / 轻量模式可以只
 - “确认”、“通过”、“接受”、“进入 spec / 进入规格”、“开始 plan / 开始计划”、“开始实现”、“继续下一阶段”等表达，都表示接受当前/前一阶段。
 - 如果前置阶段有 open questions、risks 或 assumptions，但用户仍要求继续，记录这些事项并进入目标阶段，不要反复要求用户确认。
 - 如果当前阶段存在必须由用户决定的不确定事项，先询问用户；如果用户选择继续推进，把不确定事项记录为 risk 或 assumption。
+- 阶段边界是硬边界。除非用户在当前消息中明确要求跨越多个阶段，否则一次回复只处理当前阶段，不要把 Requirement / 需求、Implementation / 实现和 Verification / 验证连跑。
+- 当用户说“使用 light / 轻量模式，开始 Requirement / 需求”或类似表达时，只创建或更新 requirement 草稿并请求 review；不要在同一轮写产品代码、运行验证或创建 verification。
+- light / 轻量模式仍需要分阶段推进：Requirement 被用户接受或用户明确要求开始实现后，才能进入 Implementation；Implementation 完成后应汇报实现结果并等待用户要求验证，除非用户已在当前消息中明确要求“实现并验证”或“跑完整个 light 流程”。
 
 ## Requirement / 需求阶段
 
-澄清要做什么和为什么做。所有流程模式都使用 Requirement / 需求这一概念；light / 轻量模式只写短版需求，不向用户引入额外的阶段概念。
+澄清要做什么和为什么做。所有流程模式都使用 Requirement / 需求这一概念；light / 轻量模式采用适中澄清策略，但不向用户引入额外的阶段概念。
 
 职责：
 
 1. 创建或更新 `docs/requirement/<yyyymmdd>-<feature>.md`。
 2. strict / 严格模式和 standard / 标准模式捕获 background、goals、non-goals、user scenarios、acceptance criteria、open questions、decisions 和 user review notes。
-3. light / 轻量模式可以只记录目标、非目标、验收标准和风险/假设，但仍称为 Requirement / 需求。
+3. light / 轻量模式采用适中澄清策略，至少记录目标、非目标、验收标准、风险/假设；必要时也记录背景、场景、待定问题、决策和用户审查记录，但仍称为 Requirement / 需求。
 4. 除非用户明确要求推进，否则不写 spec、plan 或产品代码。
 5. draft 完成后请求用户 review requirement；如果用户要求进入后一阶段，自动将 requirement 标记为 `Accepted`。
 6. 向用户展示 requirement / 需求草稿时，除了总结已确认的需求，还必须显式提示仍需要用户关注的未决事项。这些事项包括但不限于：尚未确认的假设、影响方案选择的决策点、范围边界不清之处、验收标准中的模糊点、依赖外部条件的风险，以及可以继续推进但需要后续确认的问题。如果没有这类事项，应明确说明“暂无需要用户确认的未决事项”。
@@ -164,14 +167,24 @@ standard / 标准模式可以不创建 `spec.md`。light / 轻量模式可以只
 light / 轻量模式推荐需求结构：
 
 ```markdown
+## Background
+
 ## Goal
 
 ## Non-goal
 
+## User scenarios
+
 ## Acceptance
+
+## Open questions
+
+## Decisions
 
 ## Risk
 ```
+
+如果变更确实很小，可以将无内容章节标为“不适用”，但不要跳过对目标、边界、验收和风险/假设的适中澄清。
 
 
 ## Implementation / 实现阶段
