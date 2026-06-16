@@ -1,8 +1,9 @@
+import re
 from pathlib import Path
 
 import pytest
 
-from specflow.cli import main
+from specflow.cli import _update_template_timestamp, main
 
 
 def test_help_options_show_help(capsys: pytest.CaptureFixture[str]) -> None:
@@ -40,11 +41,31 @@ def test_init_creates_docs_and_project_templates(
     assert result == 0
     assert "Initialized docs/ and .specflow/template/." in output
     assert Path("docs").is_dir()
-    assert Path(".specflow/template/requirement.md").is_file()
-    assert Path(".specflow/template/spec.md").is_file()
-    assert Path(".specflow/template/plan.md").is_file()
-    assert Path(".specflow/template/verification.md").is_file()
+    for filename in (
+        "requirement.md",
+        "spec.md",
+        "plan.md",
+        "verification.md",
+    ):
+        content = Path(".specflow/template", filename).read_text(encoding="utf-8")
+        assert re.search(
+            r"^最后修改时间: \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$",
+            content,
+            re.MULTILINE,
+        )
     assert not Path(".claude/skills/specflow.md").exists()
+
+
+def test_update_template_timestamp_leaves_missing_line_unchanged(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "requirement.md"
+    content = "# Requirement\n\n## Review status\n\nDraft\n"
+    target.write_text(content, encoding="utf-8")
+
+    _update_template_timestamp(target)
+
+    assert target.read_text(encoding="utf-8") == content
 
 
 def test_status_reports_review_status_and_missing_stage_directory_files(

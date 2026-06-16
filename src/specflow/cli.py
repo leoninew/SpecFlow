@@ -1,9 +1,12 @@
 import argparse
+import re
 from collections.abc import Sequence
+from datetime import datetime
 from pathlib import Path
 
 PROTOCOL_FILES = ("requirement.md", "spec.md", "plan.md", "verification.md")
 PROTOCOL_STAGES = tuple(filename.removesuffix(".md") for filename in PROTOCOL_FILES)
+TEMPLATE_TIMESTAMP_PATTERN = re.compile(r"^最后修改时间: .*$", re.MULTILINE)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -55,6 +58,7 @@ def init() -> None:
         target = template_dir / filename
         if not target.exists():
             target.write_text(_template(filename), encoding="utf-8")
+            _update_template_timestamp(target)
 
     print("Initialized docs/ and .specflow/template/.")
 
@@ -134,6 +138,15 @@ def _template(filename: str) -> str:
         / filename
     )
     return path.read_text(encoding="utf-8")
+
+
+def _update_template_timestamp(path: Path) -> None:
+    content = path.read_text(encoding="utf-8")
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    updated = TEMPLATE_TIMESTAMP_PATTERN.sub(
+        f"最后修改时间: {timestamp}", content, count=1
+    )
+    path.write_text(updated, encoding="utf-8")
 
 
 def _document_status(path: Path | None) -> str:

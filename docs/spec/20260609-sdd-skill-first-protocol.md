@@ -44,9 +44,9 @@ CLI 保持最小化，只负责初始化文档模板以及可选的诊断状态�
 
    - strict：Requirement → Spec → Plan → Implementation → Verification
    - standard：Requirement → Plan → Implementation → Verification
-   - light：Scope note → Implementation → Verification
+   - light：Requirement → Implementation → Verification
 
-   light 仍必须保留最小 scope note 和 verification。
+   light 仍必须保留经过适中澄清的 requirement 和 verification；verification 不得缩水成极简验收备注。
 
 3. 低命令噪声
 
@@ -202,8 +202,12 @@ Skill 在该阶段不应主动编写 Spec、Plan 或代码。
 - 遵循已有 requirement/spec/plan 约束
 - 如果 plan 缺失或未 approved，但用户明确要求实现，则提示风险后在用户给定范围内继续
 - 如果代码现实与 plan 冲突，报告冲突并按需要更新过程文档，而不是静默改变范围
+- 默认流程下，实现完成后停留在 Implementation，汇报实际改动、未运行检查、风险和可能偏离范围；等待用户人工验收并明确要求 Verification
+- 如果用户明确要求连续完成实现和验证，先汇报实现结果和风险，再进入 Verification
 
 ### Verification stage
+
+进入条件：默认需要用户已看过 Implementation 结果和风险，并在实现完成后明确要求开始 Verification。如果用户明确要求连续完成实现和验证，该请求可作为进入 Verification 的授权；进入前仍必须先汇报实现结果和风险。
 
 职责：
 
@@ -336,6 +340,8 @@ Review status 只使用：
 - `Accepted`
 
 用户明确确认当前阶段，或明确要求进入后一阶段，都视为接受当前/前一阶段。skill 应自动更新前置文档状态，避免反复询问 review 后才能继续。
+
+Verification 是特殊边界：默认流程下，实现完成后不自动进入 Verification。skill 必须先汇报实现结果和风险，等待用户人工验收并明确要求开始 Verification。用户明确要求连续完成实现和验证时，skill 也必须先汇报实现结果和风险，再进入 Verification。
 
 不引入 `Approved`、`Blocked`、`Completed`、`Proceeded with assumptions` 等额外状态；风险和假设写入章节内容。
 

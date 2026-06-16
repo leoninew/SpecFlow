@@ -40,7 +40,7 @@ When a conversation is ready to become a tracked software change, tell the agent
 - `standard`: for ordinary feature work. Flow: Requirement → Plan → Implementation → Verification.
 - `light`: for small, clearly scoped changes. Flow: Requirement → Implementation → Verification.
 
-Light mode still keeps moderately clarified Requirement and Verification records, so the work does not become undocumented direct coding.
+Light mode still keeps moderately clarified Requirement and Verification records. It should not become undocumented direct coding or a minimal acceptance note.
 
 ### Start the flow
 
@@ -64,7 +64,7 @@ Start light mode for a small, clearly scoped change from Requirement:
 Use /specflow light: make all modal dialogs use the same Cancel and Confirm button order, start Requirement.
 ```
 
-During the Requirement stage, if there are assumptions, risks, or open questions, the agent lists them in the stage document and in its reply. If you still ask to continue, SpecFlow records them as risks or assumptions and moves to the target stage. When starting light mode from Requirement, the agent should only create or update the requirement draft and ask for review; it should not implement and verify in the same turn unless you explicitly ask to "implement and verify" or "run the full light flow."
+During the Requirement stage, if there are assumptions, risks, or open questions, the agent lists them in the stage document and in its reply. If you still ask to continue, SpecFlow records them as risks or assumptions and moves to the target stage. When starting light mode from Requirement, the agent should only create or update the requirement draft and ask for review; it should not implement or verify in the same turn.
 
 ### Move through stages
 
@@ -90,13 +90,13 @@ Confirmed, start Implementation.
 
 ### Handoff
 
-After implementation is done, ask the agent to enter Verification:
+By default, after implementation is done, first review the implementation summary, actual diff, skipped checks, risks, and possible scope drift. Then explicitly ask the agent to enter Verification:
 
 ```text
-Looks good, start Verification.
+The implementation looks acceptable; start Verification.
 ```
 
-SpecFlow does not automatically run `git add`, `git commit`, or `git push`.
+If you explicitly ask the agent to complete implementation and verification in the same request, the agent may continue into Verification after first showing the implementation summary and pre-verification risks. SpecFlow does not write a suggested commit message before Verification or run `git add`, `git commit`, or `git push`.
 
 ## CLI
 
