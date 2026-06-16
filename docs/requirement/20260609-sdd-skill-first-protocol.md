@@ -88,7 +88,7 @@ sdd 要解决的问题是：在使用现有 coding agent 开发功能时，缺�
 
 6. 不自动替用户确认阶段
 
-   只有用户明确表达确认后，skill 才能把阶段文档标记为 `Accepted`。
+   只有用户明确表达确认后，skill 才能把阶段文档标记为 `Accepted`。默认流程下，实现完成后先提示实现结果和风险，再等待用户明确要求验证；如果用户明确要求连续完成实现和验证，进入验证前也必须先提示实现结果和风险。
 
 7. 不做项目管理系统
 
@@ -171,7 +171,7 @@ Skill 基于已有 requirement/spec/plan 允许 Claude Code / Codex 正常实现
 
 ### Verification phase
 
-实现完成后，skill 进入 Verification 阶段：
+默认流程下，实现完成后，skill 停留在 Implementation 阶段，汇报实际改动、未运行检查、已知风险和可能偏离范围；用户人工验收并明确要求开始 Verification 后，skill 进入 Verification 阶段。如果用户明确要求连续完成实现和验证，skill 可在先汇报实现结果和风险后继续进入 Verification：
 
 - 对照 requirement 检查目标是否满足
 - 对照 spec 检查设计是否一致
@@ -270,13 +270,15 @@ Accepted
 
 6. 如果用户明确要求开始实现，即使 Plan 未确认，Skill 也可以开始实现；但必须先提示 Plan 未确认、列出实施风险和可能偏离点。
 
-7. Skill 遇到不确定事项时必须提问；如果用户选择继续推进，Skill 应记录这些不确定事项，而不是静默假设。
+7. 默认流程下，实现完成后，Skill 必须先提示实际改动、未运行检查、风险和可能偏离范围；用户明确要求开始 Verification 后，才能创建 verification 文档、运行验证阶段流程或输出建议 commit message。如果用户明确要求连续完成实现和验证，Skill 也必须先提示实现结果和风险，再进入 Verification。
 
-8. Skill 只有在用户明确确认后，才能把对应文档标记为 `Accepted`。
+8. Skill 遇到不确定事项时必须提问；如果用户选择继续推进，Skill 应记录这些不确定事项，而不是静默假设。
 
-9. Skill 可以直接使用 Claude Code / Codex 的文件读写能力维护文档，不需要每一步调用 CLI。
+9. Skill 只有在用户明确确认后，才能把对应文档标记为 `Accepted`。
 
-10. Skill 可以在必要时建议或使用 CLI 做初始化或诊断，但 CLI 不是主流程。
+10. Skill 可以直接使用 Claude Code / Codex 的文件读写能力维护文档，不需要每一步调用 CLI。
+
+11. Skill 可以在必要时建议或使用 CLI 做初始化或诊断，但 CLI 不是主流程。
 
 ## CLI requirements
 

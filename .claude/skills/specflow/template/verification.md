@@ -1,5 +1,7 @@
 # Verification / 验证：<feature>
 
+最后修改时间: 2026-06-16 14:51:50
+
 ## Review status / 审查状态
 
 Draft
@@ -8,7 +10,7 @@ Draft
 
 strict / 严格 / standard / 标准 / light / 轻量
 
-light / 轻量模式可使用短版 Verification / 验证，只保留 What changed / 变更内容、Acceptance / 验收、Commands / 命令、Remaining risk / 剩余风险。
+light / 轻量模式使用本模板。没有 spec 或 plan 时，对应小节写“不适用”或“按 requirement / 需求核对”。不要只写变更摘要、验收、命令和剩余风险。
 
 ## Requirement alignment / 需求对齐
 
@@ -30,7 +32,7 @@ strict/standard / 严格/标准模式填写；light / 轻量模式可对照 Requ
 
 -
 
-## Planned vs actual changed files / 计划与实际修改文件对比
+## Expected vs actual changed files / 预期与实际修改文件对比
 
 -
 
