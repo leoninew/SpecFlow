@@ -18,12 +18,12 @@ Each mode keeps enough process record for humans and future agents to review wha
 
 ## Install
 
-SpecFlow uses standard Python packaging metadata and provides a `justfile` for common development commands. The recipes use `uv` for dependency-managed commands.
+SpecFlow uses standard Python packaging metadata and provides a `Makefile` for common development commands. The targets use `uv` for dependency-managed commands.
 
 Install the package and development dependencies:
 
 ```bash
-just install
+make install
 ```
 
 SpecFlow's skill source lives in `.claude/skills/specflow/`. Install or sync it through your coding-agent runtime's skill mechanism.
@@ -127,7 +127,7 @@ New documents use only two review states: `Draft` and `Accepted`.
 Run the project checks:
 
 ```bash
-just check
+make check
 ```
 
 Run tests directly:
@@ -139,7 +139,7 @@ python -m pytest -q
 Build source and wheel distributions:
 
 ```bash
-just build
+make build
 ```
 
 ## License

@@ -18,12 +18,12 @@ SpecFlow 为 coding agent 提供轻量、可审查的软件变更流程。它定
 
 ## 安装
 
-SpecFlow 使用标准 Python 打包元数据，并提供 `justfile` 作为常用开发命令入口。这些 recipe 使用 `uv` 执行依赖管理相关命令。
+SpecFlow 使用标准 Python 打包元数据，并提供 `Makefile` 作为常用开发命令入口。这些 target 使用 `uv` 执行依赖管理相关命令。
 
 安装包和开发依赖：
 
 ```bash
-just install
+make install
 ```
 
 SpecFlow 的 skill 源文件位于 `.claude/skills/specflow/`。请通过所用 coding-agent runtime 的 skill 机制安装或同步它。
@@ -127,7 +127,7 @@ docs/verification/<yyyymmdd>-<feature>.md
 运行项目检查：
 
 ```bash
-just check
+make check
 ```
 
 直接运行测试：
@@ -139,7 +139,7 @@ python -m pytest -q
 构建 source 和 wheel distributions：
 
 ```bash
-just build
+make build
 ```
 
 ## 许可证
