@@ -131,7 +131,8 @@ def _flat_document(path: Path) -> tuple[str, str] | None:
 def _template(filename: str) -> str:
     path = (
         Path(__file__).resolve().parents[2]
-        / ".claude"
+        / "plugins"
+        / "specflow"
         / "skills"
         / "specflow"
         / "template"

@@ -26,7 +26,8 @@ SpecFlow 使用标准 Python 打包元数据，并提供 `Makefile` 作为常用
 make install
 ```
 
-SpecFlow 的 skill 源文件位于 `.claude/skills/specflow/`。请通过所用 coding-agent runtime 的 skill 机制安装或同步它。
+SpecFlow 的原生 plugin 包内 skill 位于 `plugins/specflow/skills/specflow/`。运行 `make release`
+会安装 editable CLI 包，并通过 Claude Code、Codex 或 Grok Build 的本地 plugin 机制发布。
 
 ## 使用
 

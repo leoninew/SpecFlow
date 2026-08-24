@@ -26,7 +26,9 @@ Install the package and development dependencies:
 make install
 ```
 
-SpecFlow's skill source lives in `.claude/skills/specflow/`. Install or sync it through your coding-agent runtime's skill mechanism.
+SpecFlow's native plugin package contains its skill at `plugins/specflow/skills/specflow/`. Run
+`make release` to install the editable CLI package and publish the plugin through the local
+Claude Code, Codex, or Grok Build plugin mechanism.
 
 ## Use
 
