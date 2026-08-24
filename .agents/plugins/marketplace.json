@@ -1,0 +1,12 @@
+{
+  "name": "specflow-local",
+  "plugins": [
+    {
+      "name": "specflow",
+      "source": {
+        "source": "local",
+        "path": "./plugins/specflow"
+      }
+    }
+  ]
+}

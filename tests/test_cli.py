@@ -53,7 +53,7 @@ def test_init_creates_docs_and_project_templates(
             content,
             re.MULTILINE,
         )
-    assert not Path(".claude/skills/specflow.md").exists()
+    assert not Path("plugins/specflow/skills/specflow").exists()
 
 
 def test_update_template_timestamp_leaves_missing_line_unchanged(

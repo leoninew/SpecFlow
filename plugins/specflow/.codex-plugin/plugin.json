@@ -1,0 +1,17 @@
+{
+  "name": "specflow",
+  "version": "0.1.0",
+  "author": {
+    "name": "SpecFlow contributors"
+  },
+  "description": "A skill-first development protocol for coding agents.",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SpecFlow",
+    "shortDescription": "Guide software changes through reviewable stages.",
+    "longDescription": "Provides the SpecFlow skill-first development protocol for coding agents.",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": "Use SpecFlow to guide this software change through the appropriate development stages."
+  }
+}

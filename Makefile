@@ -2,9 +2,6 @@ SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
 .DEFAULT_GOAL := help
 
-SKILL_SOURCE_DIR := .claude/skills/specflow
-CLAUDE_SKILL_TARGET_DIR := $(HOME)/.claude/skills/specflow
-CODEX_SKILL_TARGET_DIR := $(HOME)/.codex/skills/specflow
 ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
 
 .PHONY: help install dev check test build release clean
@@ -16,7 +13,7 @@ help:
 	@printf "  check    Run ruff and mypy checks\n"
 	@printf "  test     Run pytest\n"
 	@printf "  build    Build source and wheel distributions\n"
-	@printf "  release  Install package and sync skill files\n"
+	@printf "  release  Preflight, editable-install, and publish the native plugin\n"
 	@printf "  clean    Remove local build and cache artifacts\n"
 
 install:
@@ -37,14 +34,9 @@ build:
 	python -m build
 
 release:
-	pip install -e .
-	test -f "$(SKILL_SOURCE_DIR)/SKILL.md" || { printf '%s\n' "Missing skill source: $(SKILL_SOURCE_DIR)/SKILL.md" >&2; exit 1; }
-	mkdir -p "$(CLAUDE_SKILL_TARGET_DIR)" "$(CODEX_SKILL_TARGET_DIR)"
-	rsync -av "$(SKILL_SOURCE_DIR)"/ "$(CLAUDE_SKILL_TARGET_DIR)"/ --del
-	rsync -av "$(SKILL_SOURCE_DIR)"/ "$(CODEX_SKILL_TARGET_DIR)"/ --del
-	printf '%s\n' "Installed specflow package in editable mode."
-	printf '%s\n' "Synced specflow skill files to $(CLAUDE_SKILL_TARGET_DIR)"
-	printf '%s\n' "Synced specflow skill files to $(CODEX_SKILL_TARGET_DIR)"
+	python scripts/release.py plugin check
+	python -m pip install -e .
+	python scripts/release.py plugin apply
 
 clean:
 	find . -type d -name "__pycache__" -not -path "./.git/*" -exec rm -rf {} +

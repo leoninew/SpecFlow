@@ -1,0 +1,13 @@
+{
+  "name": "specflow-local",
+  "description": "Local marketplace for the SpecFlow skill-first development protocol.",
+  "owner": {
+    "name": "SpecFlow contributors"
+  },
+  "plugins": [
+    {
+      "name": "specflow",
+      "source": "./plugins/specflow"
+    }
+  ]
+}
