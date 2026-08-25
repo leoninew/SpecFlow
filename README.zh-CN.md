@@ -20,14 +20,20 @@ SpecFlow 为 coding agent 提供轻量、可审查的软件变更流程。它定
 
 SpecFlow 使用标准 Python 打包元数据，并提供 `Makefile` 作为常用开发命令入口。这些 target 使用 `uv` 执行依赖管理相关命令。
 
-安装包和开发依赖：
+同步锁定的开发依赖：
+
+```bash
+make deps
+```
+
+将 editable CLI 安装到用户级工具目录，并同步原生 plugin：
 
 ```bash
 make install
 ```
 
-SpecFlow 的原生 plugin 包内 skill 位于 `plugins/specflow/skills/specflow/`。运行 `make release`
-会安装 editable CLI 包，并通过 Claude Code、Codex 或 Grok Build 的本地 plugin 机制发布。
+SpecFlow 的原生 plugin 包内 skill 位于 `plugins/specflow/skills/specflow/`。`install` target
+会通过 Claude Code、Codex 或 Grok Build 的本地 plugin 机制完成预检和同步。
 
 ## 使用
 
@@ -131,16 +137,17 @@ docs/verification/<yyyymmdd>-<feature>.md
 make check
 ```
 
-直接运行测试：
+运行单元测试，或生成覆盖率：
 
 ```bash
-python -m pytest -q
+make test
+make test cov=1
 ```
 
 构建 source 和 wheel distributions：
 
 ```bash
-make build
+make release
 ```
 
 ## 许可证

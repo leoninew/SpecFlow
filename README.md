@@ -20,15 +20,21 @@ Each mode keeps enough process record for humans and future agents to review wha
 
 SpecFlow uses standard Python packaging metadata and provides a `Makefile` for common development commands. The targets use `uv` for dependency-managed commands.
 
-Install the package and development dependencies:
+Sync the locked development dependencies:
+
+```bash
+make deps
+```
+
+Install the editable CLI in the user tool directory and synchronize the native plugin:
 
 ```bash
 make install
 ```
 
-SpecFlow's native plugin package contains its skill at `plugins/specflow/skills/specflow/`. Run
-`make release` to install the editable CLI package and publish the plugin through the local
-Claude Code, Codex, or Grok Build plugin mechanism.
+SpecFlow's native plugin package contains its skill at `plugins/specflow/skills/specflow/`. The
+`install` target checks and synchronizes it through the local Claude Code, Codex, or Grok Build
+plugin mechanism.
 
 ## Use
 
@@ -132,16 +138,17 @@ Run the project checks:
 make check
 ```
 
-Run tests directly:
+Run the unit tests, or collect coverage:
 
 ```bash
-python -m pytest -q
+make test
+make test cov=1
 ```
 
 Build source and wheel distributions:
 
 ```bash
-make build
+make release
 ```
 
 ## License

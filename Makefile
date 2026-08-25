@@ -1,49 +1,62 @@
+# Recipes use POSIX shell commands; GNU Make with bash is required on Windows.
 SHELL := bash
 .SHELLFLAGS := -eu -o pipefail -c
+
 .DEFAULT_GOAL := help
 
-ARGS := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+UV ?= uv
+ARGS ?=
+CHECK_FIX := $(filter 1 true yes,$(fix))
+TEST_COV_ARGS :=
+RUFF_FORMAT_ARGS := --check
+RUFF_CHECK_ARGS :=
 
-.PHONY: help install dev check test build release clean
+ifneq ($(CHECK_FIX),)
+RUFF_FORMAT_ARGS :=
+RUFF_CHECK_ARGS := --fix
+endif
 
-help:
+ifneq ($(filter 1 true yes,$(cov)),)
+TEST_COV_ARGS := --cov=src/specflow --cov-report=term-missing --cov-report=html
+endif
+
+.PHONY: help deps install dev check test release clean
+
+help: ## Show the public workflow.
 	@printf "Available targets:\n"
-	@printf "  install  Install development dependencies\n"
-	@printf "  dev      Run specflow CLI, optionally with ARGS='...'\n"
-	@printf "  check    Run ruff and mypy checks\n"
-	@printf "  test     Run pytest\n"
-	@printf "  build    Build source and wheel distributions\n"
-	@printf "  release  Preflight, editable-install, and publish the native plugin\n"
-	@printf "  clean    Remove local build and cache artifacts\n"
+	@printf "  deps            Sync locked development dependencies\n"
+	@printf "  install         Install the editable CLI and sync agent plugins\n"
+	@printf "  dev             Run the SpecFlow CLI, optionally with ARGS='...'\n"
+	@printf "  check [fix=1]   Check format, lint, and types\n"
+	@printf "  test [cov=1]    Run unit tests, optionally with coverage\n"
+	@printf "  release         Build source and wheel distributions\n"
+	@printf "  clean           Remove explicitly listed local artifacts\n"
 
-install:
-	uv sync --group dev
+deps: ## Sync locked development dependencies without installing the project.
+	$(UV) sync --all-groups --locked --no-install-project
 
-dev:
-	uv run specflow $(ARGS)
+install: ## Install the user-level editable CLI and synchronize agent plugins.
+	$(UV) tool install --editable . --force
+	@command -v specflow >/dev/null || { \
+		printf "specflow is not visible on PATH after uv tool install; add the directory from 'uv tool dir --bin' and restart the shell.\n" >&2; \
+		exit 1; \
+	}
+	$(UV) run --locked python scripts/release.py plugin check
+	$(UV) run --locked python scripts/release.py plugin apply
 
-check:
-	uv run ruff check --fix src tests
-	uv run ruff format src tests
-	uv run mypy src
+dev: ## Run the SpecFlow CLI, optionally with ARGS='...'.
+	$(UV) run --locked specflow $(ARGS)
 
-test:
-	uv run pytest
+check: ## Check format, lint, and types; use fix=1 to apply fixes.
+	$(UV) run --locked ruff format $(RUFF_FORMAT_ARGS) src tests
+	$(UV) run --locked ruff check $(RUFF_CHECK_ARGS) src tests
+	$(UV) run --locked mypy src
 
-build:
-	python -m build
+test: ## Run unit tests; use cov=1 to collect coverage.
+	$(UV) run --locked pytest tests scripts/test_release.py $(TEST_COV_ARGS)
 
-release:
-	python scripts/release.py plugin check
-	python -m pip install -e .
-	python scripts/release.py plugin apply
+release: ## Build source and wheel distributions without publishing them.
+	$(UV) build
 
-clean:
-	find . -type d -name "__pycache__" -not -path "./.git/*" -exec rm -rf {} +
-	find . -type d -name ".mypy_cache" -not -path "./.git/*" -exec rm -rf {} +
-	find . -type d -name ".ruff_cache" -not -path "./.git/*" -exec rm -rf {} +
-	rm -rf dist build *.egg-info
-	rm -f .coverage
-
-%:
-	@:
+clean: ## Remove explicitly listed local artifacts.
+	rm -rf build dist .pytest_cache .ruff_cache .mypy_cache htmlcov .coverage *.egg-info
