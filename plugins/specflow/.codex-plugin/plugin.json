@@ -1,6 +1,6 @@
 {
   "name": "specflow",
-  "version": "0.1.0",
+  "version": "0.1.1+codex.20260912063229",
   "author": {
     "name": "SpecFlow contributors"
   },
@@ -8,6 +8,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "SpecFlow",
+    "developerName": "SpecFlow contributors",
     "shortDescription": "Guide software changes through reviewable stages.",
     "longDescription": "Provides the SpecFlow skill-first development protocol for coding agents.",
     "category": "Developer Tools",

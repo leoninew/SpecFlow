@@ -42,7 +42,7 @@ def test_init_creates_docs_and_project_templates(
     assert "Initialized docs/ and .specflow/template/." in output
     assert Path("docs").is_dir()
     for filename in (
-        "requirement.md",
+        "intent.md",
         "spec.md",
         "plan.md",
         "verification.md",
@@ -59,8 +59,8 @@ def test_init_creates_docs_and_project_templates(
 def test_update_template_timestamp_leaves_missing_line_unchanged(
     tmp_path: Path,
 ) -> None:
-    target = tmp_path / "requirement.md"
-    content = "# Requirement\n\n## Review status\n\nDraft\n"
+    target = tmp_path / "intent.md"
+    content = "# Intent\n\n## Review status\n\nDraft\n"
     target.write_text(content, encoding="utf-8")
 
     _update_template_timestamp(target)
@@ -72,12 +72,12 @@ def test_status_reports_review_status_and_missing_stage_directory_files(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     monkeypatch.chdir(tmp_path)
-    requirement_dir = Path("docs/requirement")
+    intent_dir = Path("docs/intent")
     spec_dir = Path("docs/spec")
-    requirement_dir.mkdir(parents=True)
+    intent_dir.mkdir(parents=True)
     spec_dir.mkdir(parents=True)
-    (requirement_dir / "20260609-specflow-rename.md").write_text(
-        "# Requirement\n\n## Review status\n\nDraft\n", encoding="utf-8"
+    (intent_dir / "20260609-specflow-rename.md").write_text(
+        "# Intent\n\n## Review status\n\nDraft\n", encoding="utf-8"
     )
     (spec_dir / "20260609-specflow-rename.md").write_text(
         "# Spec\n\n## Review status\n\nAccepted\n", encoding="utf-8"
@@ -88,7 +88,7 @@ def test_status_reports_review_status_and_missing_stage_directory_files(
     output = capsys.readouterr().out
     assert result == 0
     assert "docs/20260609-specflow-rename:" in output
-    assert "requirement  Draft" in output
+    assert "intent       Draft" in output
     assert "spec         Accepted" in output
     assert "plan         missing" in output
     assert "verification missing" in output
@@ -100,8 +100,8 @@ def test_status_falls_back_to_flat_protocol_files(
     monkeypatch.chdir(tmp_path)
     docs = Path("docs")
     docs.mkdir()
-    (docs / "20260609-specflow-rename-requirement.md").write_text(
-        "# Requirement\n\n## Review status\n\nDraft\n", encoding="utf-8"
+    (docs / "20260609-specflow-rename-intent.md").write_text(
+        "# Intent\n\n## Review status\n\nDraft\n", encoding="utf-8"
     )
 
     result = main(["status"])
@@ -109,7 +109,7 @@ def test_status_falls_back_to_flat_protocol_files(
     output = capsys.readouterr().out
     assert result == 0
     assert "docs/20260609-specflow-rename:" in output
-    assert "requirement  Draft" in output
+    assert "intent       Draft" in output
     assert "spec         missing" in output
 
 

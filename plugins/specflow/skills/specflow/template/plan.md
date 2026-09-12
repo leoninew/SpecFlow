@@ -10,11 +10,11 @@ Draft
 
 strict / 严格 / standard / 标准
 
-## Requirement basis / 需求依据
+## Intent basis / 意图依据
 
-基于 `requirement.md`。
+基于 `intent.md`。
 
-如果 Requirement / 需求尚未 Accepted / 接受，在这里说明前置条件不足、待定事项和风险。
+如果 Intent / 意图尚未 Accepted / 接受，在这里说明前置条件不足、待定事项和风险。
 
 ## Spec basis / 规格依据
 

@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from datetime import datetime
 from pathlib import Path
 
-PROTOCOL_FILES = ("requirement.md", "spec.md", "plan.md", "verification.md")
+PROTOCOL_FILES = ("intent.md", "spec.md", "plan.md", "verification.md")
 PROTOCOL_STAGES = tuple(filename.removesuffix(".md") for filename in PROTOCOL_FILES)
 TEMPLATE_TIMESTAMP_PATTERN = re.compile(r"^最后修改时间: .*$", re.MULTILINE)
 

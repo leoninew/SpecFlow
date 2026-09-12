@@ -1,20 +1,21 @@
 # 规格：SDD Skill-first 开发流程协议
+最后修改时间: 2026-09-12 14:20:11
 
 ## Review status
 
 Draft
 
-## Requirement basis
+## Intent basis
 
-基于 `docs/requirement/20260609-sdd-skill-first-protocol.md`。
+基于 `docs/intent/20260609-sdd-skill-first-protocol.md`。
 
-Requirement review status: Draft。
+Intent review status: Draft。
 
-用户明确要求在 Requirement 尚未 approved 的情况下进入 Spec。因此本 Spec 带着以下前提继续：
+用户明确要求在 Intent 尚未 approved 的情况下进入 Spec。因此本 Spec 带着以下前提继续：
 
-- Requirement 仍可能变化。
-- Requirement 中未解决的问题应作为风险或假设延续到 Spec。
-- 如果后续 Requirement 修改与本 Spec 冲突，必须回头修订 Spec。
+- Intent 仍可能变化。
+- Intent 中未解决的问题应作为风险或假设延续到 Spec。
+- 如果后续 Intent 修改与本 Spec 冲突，必须回头修订 Spec。
 
 ## Overview
 
@@ -22,7 +23,7 @@ sdd 将围绕一个单一的用户入口 skill 重新设计，定位为 Skill-fi
 
 主要用户体验不是一串 CLI 命令。用户通过自然语言或 skill 入口调用 sdd，skill 引导开发过程经过以下阶段：
 
-1. Requirement
+1. Intent
 2. Spec
 3. Plan
 4. Implementation
@@ -38,15 +39,15 @@ CLI 保持最小化，只负责初始化文档模板以及可选的诊断状态�
 
    用户只需要面对一个 sdd skill，而不是一组命令或多个阶段专用 skill。
 
-2. 按任务大小选择流程模式
+2. 按意图大小选择流程模式
 
    sdd 支持 strict、standard、light 三种模式：
 
-   - strict：Requirement → Spec → Plan → Implementation → Verification
-   - standard：Requirement → Plan → Implementation → Verification
-   - light：Requirement → Implementation → Verification
+   - strict：Intent → Spec → Plan → Implementation → Verification
+   - standard：Intent → Plan → Implementation → Verification
+   - light：Intent → Implementation → Verification
 
-   light 仍必须保留经过适中澄清的 requirement 和 verification；verification 不得缩水成极简验收备注。
+   light 仍必须保留经过适中澄清的 intent 和 verification；verification 不得缩水成极简验收备注。
 
 3. 低命令噪声
 
@@ -54,7 +55,7 @@ CLI 保持最小化，只负责初始化文档模板以及可选的诊断状态�
 
 3. 软流程护栏
 
-   默认路径鼓励 Requirement → Spec → Plan → Implementation → Verification，并在主要文档阶段要求 review。
+   默认路径鼓励 Intent → Spec → Plan → Implementation → Verification，并在主要文档阶段要求 review。
 
    如果用户明确要求在 review 不完整时继续推进，skill 应先提示缺失确认、open questions 和风险，然后按用户指令继续。
 
@@ -96,7 +97,7 @@ Skill 不应依赖频繁 CLI 调用。
 sdd 包自身的过程文档放在包内 `docs/`，并使用 stage 目录命名规则：
 
 ```text
-docs/requirement/20260609-sdd-skill-first-protocol.md
+docs/intent/20260609-sdd-skill-first-protocol.md
 docs/spec/20260609-sdd-skill-first-protocol.md
 docs/plan/20260609-sdd-skill-first-protocol.md
 docs/verification/20260609-sdd-skill-first-protocol.md
@@ -105,7 +106,7 @@ docs/verification/20260609-sdd-skill-first-protocol.md
 安装到其他项目后，feature 文档仍使用：
 
 ```text
-docs/requirement/<yyyymmdd>-<feature>.md
+docs/intent/<yyyymmdd>-<feature>.md
 docs/spec/<yyyymmdd>-<feature>.md
 docs/plan/<yyyymmdd>-<feature>.md
 docs/verification/<yyyymmdd>-<feature>.md
@@ -153,9 +154,9 @@ Skill 应从以下信息推断阶段：
 
 Skill 不应需要通过 CLI 命令来决定下一步做什么。
 
-### Requirement stage
+### Intent stage
 
-新任务默认从 Requirement 阶段开始。
+新意图默认从 Intent 阶段开始。
 
 职责：
 
@@ -163,8 +164,8 @@ Skill 不应需要通过 CLI 命令来决定下一步做什么。
 - 识别 goals 和 non-goals
 - 捕获用户场景和验收标准
 - 记录 open questions 和 decisions
-- 更新 `requirement.md`
-- 请求用户 review requirement draft
+- 更新 `intent.md`
+- 请求用户 review intent draft
 
 Skill 在该阶段不应主动编写 Spec、Plan 或代码。
 
@@ -179,7 +180,7 @@ Skill 在该阶段不应主动编写 Spec、Plan 或代码。
 - 更新 `spec.md`
 - 请求用户 review spec draft
 
-如果 Requirement 未 approved，skill 应在开始时明确说明，并把未解决事项作为 assumptions 或 risks 延续下来。
+如果 Intent 未 approved，skill 应在开始时明确说明，并把未解决事项作为 assumptions 或 risks 延续下来。
 
 ### Plan stage
 
@@ -199,7 +200,7 @@ Skill 在该阶段不应主动编写 Spec、Plan 或代码。
 职责：
 
 - 使用 Claude Code / Codex 的正常实现能力
-- 遵循已有 requirement/spec/plan 约束
+- 遵循已有 intent/spec/plan 约束
 - 如果 plan 缺失或未 approved，但用户明确要求实现，则提示风险后在用户给定范围内继续
 - 如果代码现实与 plan 冲突，报告冲突并按需要更新过程文档，而不是静默改变范围
 - 默认流程下，实现完成后停留在 Implementation，汇报实际改动、未运行检查、风险和可能偏离范围；等待用户人工验收并明确要求 Verification
@@ -211,14 +212,14 @@ Skill 在该阶段不应主动编写 Spec、Plan 或代码。
 
 职责：
 
-- 对照 requirement/spec/plan 检查实现
+- 对照 intent/spec/plan 检查实现
 - 运行或收集相关测试结果
 - 记录 alignment、risks、incomplete items 和 conclusion
 - 更新 `verification.md`
 
 ## Template changes
 
-### `requirement.md`
+### `intent.md`
 
 新增或保留章节：
 
@@ -237,7 +238,7 @@ Skill 在该阶段不应主动编写 Spec、Plan 或代码。
 新增或保留章节：
 
 - Review status
-- Requirement basis
+- Intent basis
 - Overview
 - Design principles
 - Proposed structure
@@ -254,7 +255,7 @@ Skill 在该阶段不应主动编写 Spec、Plan 或代码。
 新增或保留章节：
 
 - Review status
-- Requirement basis
+- Intent basis
 - Spec basis
 - Implementation steps
 - Files to change
@@ -267,7 +268,7 @@ Skill 在该阶段不应主动编写 Spec、Plan 或代码。
 
 新增或保留章节：
 
-- Requirement alignment
+- Intent alignment
 - Spec alignment
 - Plan alignment
 - Test results
@@ -283,7 +284,7 @@ Skill 在该阶段不应主动编写 Spec、Plan 或代码。
 
 ```text
 .claude/skills/sdd/SKILL.md
-.claude/skills/sdd/requirement.md
+.claude/skills/sdd/intent.md
 .claude/skills/sdd/spec.md
 .claude/skills/sdd/plan.md
 .claude/skills/sdd/verification.md
@@ -373,7 +374,7 @@ Verification 是特殊边界：默认流程下，实现完成后不自动进入 
 
 不采用。
 
-原因：`architect` 容易暗示一次性生成 requirement/spec/plan，不能自然表达 Requirement review → Spec review → Plan review。
+原因：`architect` 容易暗示一次性生成 intent/spec/plan，不能自然表达 Intent review → Spec review → Plan review。
 
 ### 为每个阶段增加 CLI 命令
 

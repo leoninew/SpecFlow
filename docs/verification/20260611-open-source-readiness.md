@@ -1,4 +1,5 @@
 # Verification / 验证：open-source-readiness
+最后修改时间: 2026-09-12 14:20:11
 
 ## Review status
 
@@ -18,7 +19,7 @@ light / 轻量
 - Added common Python local/build artifacts to `.gitignore` after verification commands produced local build outputs.
 - Renamed Makefile targets so `make install` installs dependencies and `make skill` installs the package and syncs skill files to both Claude and Codex skill directories.
 - Updated README usage wording to start from `/specflow` and clarified that the CLI is a setup/diagnostic helper for the skill rather than the primary user interface.
-- Added `docs/requirement/20260611-open-source-readiness.md` as the light-mode scope note for this work.
+- Added `docs/intent/20260611-open-source-readiness.md` as the light-mode scope note for this work.
 
 ## Acceptance
 
@@ -38,13 +39,13 @@ light / 轻量
 - `uv build`
   - Result: passed, built `dist\specflow-0.1.0.tar.gz` and `dist\specflow-0.1.0-py3-none-any.whl`.
 - `uv run specflow status`
-  - Result: passed; `docs/20260611-open-source-readiness` requirement is reported as `Accepted`.
+  - Result: passed; `docs/20260611-open-source-readiness` intent is reported as `Accepted`.
 - Sensitive information scan using regex for common API keys, tokens, private keys, bearer tokens, and database URLs.
   - Result: no obvious secret values found. Matches were documentation text mentioning secret scanning.
 - Additional scan for common local/internal markers and key/cert/env file patterns.
   - Result: no matches / no files found.
 - `git status --short`
-  - Result: modified `.gitignore`, `README.md`, `pyproject.toml`; untracked `LICENSE`, `README.zh-CN.md`, `docs/requirement/20260611-open-source-readiness.md`, and this verification file.
+  - Result: modified `.gitignore`, `README.md`, `pyproject.toml`; untracked `LICENSE`, `README.zh-CN.md`, `docs/intent/20260611-open-source-readiness.md`, and this verification file.
 
 ## Remaining risk
 
