@@ -1,4 +1,5 @@
 # Scope note: minimize dependencies
+最后修改时间: 2026-09-12 14:20:11
 
 ## Review status
 
@@ -30,4 +31,4 @@ Accepted
 
 - `argparse` 或手写 CLI 的 help 输出格式会与 Click 不完全一致，测试应只断言稳定的关键内容。
 - 删除 `uv.lock` 会降低开发依赖版本锁定的可复现性，但能减少工具链约束。
-- Makefile 继续使用 `rsync`，这与当前实现一致；本需求不处理跨平台同步命令替换。
+- Makefile 继续使用 `rsync`，这与当前实现一致；本意图不处理跨平台同步命令替换。

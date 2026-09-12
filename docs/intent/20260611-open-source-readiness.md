@@ -1,4 +1,5 @@
-# Requirement / 需求：open-source-readiness
+# Intent / 意图：open-source-readiness
+最后修改时间: 2026-09-12 14:20:11
 
 ## Review status
 
@@ -37,7 +38,7 @@ light / 轻量
 
 ## Risk
 
-- License selection is a project/legal decision; user selected MIT for this task.
+- License selection is a project/legal decision; user selected MIT for this intent.
 - Secret scanning by regex is not a substitute for a full history audit or dedicated secret-scanning service.
 - GitHub About and Topics are recommendations only; they must be entered manually in GitHub unless the user later authorizes GitHub operations.
 - `specflow status` currently recognizes `## Review status`; this document uses that exact heading for diagnostic compatibility.

@@ -1,4 +1,5 @@
 # 验证：RSPV 文档分类管理
+最后修改时间: 2026-09-12 14:20:11
 
 ## Review status
 
@@ -13,14 +14,14 @@ light / 轻量
 - 更新 `sdd status`，优先识别 `docs/<stage>/<yyyymmdd>-<feature>.md` stage 目录文档命名。
 - 保留旧的 `docs/<feature>/<stage>.md` 目录式状态识别作为 fallback，避免现有目录式过程文档立刻不可见。
 - 更新 CLI 测试，覆盖 stage 目录命名和旧结构 fallback。
-- 更新 README、skill prompt、内部 requirement/spec 中的文档位置说明。
-- 迁移当前过程文档到 `docs/requirement/20260609-rspv-docs-categorization.md` 和 `docs/verification/20260609-rspv-docs-categorization.md`。
+- 更新 README、skill prompt、内部 intent/spec 中的文档位置说明。
+- 迁移当前过程文档到 `docs/intent/20260609-rspv-docs-categorization.md` 和 `docs/verification/20260609-rspv-docs-categorization.md`。
 
 ## Acceptance
 
 - RSPV/SDD 过程文档规则已改为 `docs/<stage>/<yyyymmdd>-<feature>.md`。
 - 同一功能通过相同 `<yyyymmdd>-<feature>.md` 文件名归组，分别放在对应 stage 目录下。
-- stage 识别限定为 `requirement`、`spec`、`plan`、`verification`。
+- stage 识别限定为 `intent`、`spec`、`plan`、`verification`。
 - `sdd status` 能按 stage 目录结构输出各阶段状态。
 
 ## Commands

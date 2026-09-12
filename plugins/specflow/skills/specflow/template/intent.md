@@ -1,4 +1,4 @@
-# Requirement / 需求：<feature>
+# Intent / 意图：<feature>
 
 最后修改时间: 2026-06-16 14:51:50
 

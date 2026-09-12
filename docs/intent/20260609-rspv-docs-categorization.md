@@ -1,4 +1,5 @@
-# 需求：RSPV 文档分类管理
+# 意图：RSPV 文档分类管理
+最后修改时间: 2026-09-12 14:20:11
 
 ## Review status
 
@@ -14,19 +15,19 @@ light / 轻量
 
 文档采用 stage 目录命名，而不是 `docs/<feature>/<stage>.md` 目录形式。RSPV 表示：
 
-- R：`requirement.md`
+- R：`intent.md`
 - S：`spec.md`
 - P：`plan.md`
 - V：`verification.md`
 
 具体文件名：
 
-- `docs/requirement/<yyyymmdd>-<功能>.md`
+- `docs/intent/<yyyymmdd>-<功能>.md`
 - `docs/spec/<yyyymmdd>-<功能>.md`
 - `docs/plan/<yyyymmdd>-<功能>.md`
 - `docs/verification/<yyyymmdd>-<功能>.md`
 
-其中 `<yyyymmdd>` 使用 8 位日期格式（例如 `20260609`），用于按时间排序；`<功能>` 用于表达需求或功能主题；stage 目录用于区分 requirement/spec/plan/verification。
+其中 `<yyyymmdd>` 使用 8 位日期格式（例如 `20260609`），用于按时间排序；`<功能>` 用于表达意图或功能主题；stage 目录用于区分 intent/spec/plan/verification。
 
 ## Non-goal
 
@@ -37,8 +38,8 @@ light / 轻量
 ## Acceptance
 
 - RSPV 文档在 `docs/` 下使用 `docs/<stage>/<yyyymmdd>-<功能>.md` 命名。
-- 同一功能的 requirement/spec/plan/verification 通过相同 `<yyyymmdd>-<功能>.md` 文件名归组，分别放在对应 stage 目录下。
-- `<stage>` 只使用 `requirement`、`spec`、`plan`、`verification`。
+- 同一功能的 intent/spec/plan/verification 通过相同 `<yyyymmdd>-<功能>.md` 文件名归组，分别放在对应 stage 目录下。
+- `<stage>` 只使用 `intent`、`spec`、`plan`、`verification`。
 - 文件名能够按日期排序，并能从功能名看出文档主题。
 - 后续新增 RSPV 文档时，能够根据命名规则找到合适文件名。
 

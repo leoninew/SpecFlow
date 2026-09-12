@@ -10,9 +10,9 @@ Draft
 
 strict / 严格 / standard / 标准 / light / 轻量
 
-light / 轻量模式使用本模板。没有 spec 或 plan 时，对应小节写“不适用”或“按 requirement / 需求核对”。不要只写变更摘要、验收、命令和剩余风险。
+light / 轻量模式使用本模板。没有 spec 或 plan 时，对应小节写“不适用”或“按 intent / 意图核对”。不要只写变更摘要、验收、命令和剩余风险。
 
-## Requirement alignment / 需求对齐
+## Intent alignment / 意图对齐
 
 -
 
@@ -24,7 +24,7 @@ strict / 严格模式填写；standard/light / 标准/轻量模式可填写“�
 
 ## Plan alignment / 计划对齐
 
-strict/standard / 严格/标准模式填写；light / 轻量模式可对照 Requirement / 需求。
+strict/standard / 严格/标准模式填写；light / 轻量模式可对照 Intent / 意图。
 
 -
 

@@ -1,5 +1,5 @@
 # SpecFlow Makefile 验证报告
-最后修改时间: 2026-08-25 22:25:34
+最后修改时间: 2026-09-12 14:20:11
 
 ## Review status
 
@@ -9,9 +9,9 @@ Accepted
 
 light / 轻量模式。
 
-## Requirement alignment
+## Intent alignment
 
-需求文档要求将 Python 项目的自动化入口按 `uv` 标准重新划分：依赖同步进入 `deps`，用户级 CLI 和 agent plugin/skill 同步进入 `install`，`check` 通过 `fix=1` 控制源码修改，`test` 通过 `cov=1` 控制覆盖率输出，`release` 只负责构建发布产物。
+意图文档要求将 Python 项目的自动化入口按 `uv` 标准重新划分：依赖同步进入 `deps`，用户级 CLI 和 agent plugin/skill 同步进入 `install`，`check` 通过 `fix=1` 控制源码修改，`test` 通过 `cov=1` 控制覆盖率输出，`release` 只负责构建发布产物。
 
 实现已覆盖上述目标。新增 `pytest-cov` 开发依赖及锁文件更新，是为了让 `cov=1` 在干净环境中可执行；README 和 `.gitignore` 更新是对应的使用说明与产物管理。
 
@@ -39,7 +39,7 @@ light / 轻量模式。
 - `pyproject.toml`、`uv.lock`：覆盖率开发依赖及锁定结果。
 - `.gitignore`：覆盖率和 mypy 产物。
 - `README.md`、`README.zh-CN.md`：命令使用说明。
-- `docs/requirement/20260825-project-automation-review.md`：接受需求阶段并补充规范时间戳。
+- `docs/intent/20260825-project-automation-review.md`：接受意图阶段并补充规范时间戳。
 - `docs/verification/20260825-project-automation-review.md`：本验证文档。
 
 没有发现超出自动化入口、依赖、文档和过程记录范围的产品代码改动。
@@ -71,7 +71,7 @@ light / 轻量模式。
 
 ## Missed or expanded scope
 
-- 相比需求文档，新增了 `pytest-cov` 开发依赖，因为没有该依赖时 `cov=1` 无法运行。
+- 相比意图文档，新增了 `pytest-cov` 开发依赖，因为没有该依赖时 `cov=1` 无法运行。
 - README 和 `.gitignore` 属于为公共入口和产物行为保持一致而进行的配套更新。
 - 未创建 Spec 或 Plan，符合 light / 轻量模式约定。
 
@@ -86,4 +86,4 @@ light / 轻量模式。
 
 ## Conclusion
 
-`PASS`。实现满足需求文档中的 Makefile 入口、依赖、安装、检查、测试和发布职责要求；相关检查、测试和构建均已通过。
+`PASS`。实现满足意图文档中的 Makefile 入口、依赖、安装、检查、测试和发布职责要求；相关检查、测试和构建均已通过。

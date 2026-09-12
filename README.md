@@ -44,47 +44,47 @@ When a conversation is ready to become a tracked software change, tell the agent
 
 ### Choose a flow mode
 
-- `strict`: for unclear requirements, cross-module work, or high-risk changes. Flow: Requirement → Spec → Plan → Implementation → Verification.
-- `standard`: for ordinary feature work. Flow: Requirement → Plan → Implementation → Verification.
-- `light`: for small, clearly scoped changes. Flow: Requirement → Implementation → Verification.
+- `strict`: for an unclear intent, cross-module work, or high-risk changes. Flow: Intent → Spec → Plan → Implementation → Verification.
+- `standard`: for ordinary feature work. Flow: Intent → Plan → Implementation → Verification.
+- `light`: for small, clearly scoped changes. Flow: Intent → Implementation → Verification.
 
-Light mode still keeps moderately clarified Requirement and Verification records. It should not become undocumented direct coding or a minimal acceptance note.
+Light mode still keeps moderately clarified Intent and Verification records. It should not become undocumented direct coding or a minimal acceptance note.
 
 ### Start the flow
 
-Discuss the requirement with the agent first. Clarify the goal, constraints, examples, and edge cases in normal conversation. When you are ready to enter the flow, invoke `/specflow`. The agent creates or updates the stage document and asks you to review it. Stage documents use two states: `Draft` and `Accepted`.
+Discuss the intent with the agent first. Clarify the goal, constraints, examples, and edge cases in normal conversation. When you are ready to enter the flow, invoke `/specflow`. The agent creates or updates the stage document and asks you to review it. Stage documents use two states: `Draft` and `Accepted`.
 
-Start strict mode from Requirement:
-
-```text
-Use /specflow strict: keep log files for 7 days, start Requirement.
-```
-
-Start standard mode from Requirement:
+Start strict mode from Intent:
 
 ```text
-Use /specflow standard: add report export, start Requirement.
+Use /specflow strict: keep log files for 7 days, start Intent.
 ```
 
-Start light mode for a small, clearly scoped change from Requirement:
+Start standard mode from Intent:
 
 ```text
-Use /specflow light: make all modal dialogs use the same Cancel and Confirm button order, start Requirement.
+Use /specflow standard: add report export, start Intent.
 ```
 
-During the Requirement stage, if there are assumptions, risks, or open questions, the agent lists them in the stage document and in its reply. If you still ask to continue, SpecFlow records them as risks or assumptions and moves to the target stage. When starting light mode from Requirement, the agent should only create or update the requirement draft and ask for review; it should not implement or verify in the same turn.
+Start light mode for a small, clearly scoped change from Intent:
+
+```text
+Use /specflow light: make all modal dialogs use the same Cancel and Confirm button order, start Intent.
+```
+
+During the Intent stage, if there are assumptions, risks, or open questions, the agent lists them in the stage document and in its reply. If you still ask to continue, SpecFlow records them as risks or assumptions and moves to the target stage. When starting light mode from Intent, the agent should only create or update the intent draft and ask for review; it should not implement or verify in the same turn.
 
 ### Move through stages
 
 During review, reply naturally. You do not need command-style transitions like `next` or `approve`; just say what should change, or which stage you want to enter.
 
-Accept the current requirement and start Spec:
+Accept the current intent and start Spec:
 
 ```text
 Looks good, start Spec.
 ```
 
-Accept the current requirement and start Plan:
+Accept the current intent and start Plan:
 
 ```text
 Accepted, start Plan.
@@ -122,7 +122,7 @@ For normal feature work, start from `/specflow`; use the CLI only for setup and 
 SpecFlow stores stage documents by feature:
 
 ```text
-docs/requirement/<yyyymmdd>-<feature>.md
+docs/intent/<yyyymmdd>-<feature>.md
 docs/spec/<yyyymmdd>-<feature>.md
 docs/plan/<yyyymmdd>-<feature>.md
 docs/verification/<yyyymmdd>-<feature>.md

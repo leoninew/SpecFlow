@@ -1,4 +1,5 @@
-# 需求：SDD Skill-first 开发流程协议
+# 意图：SDD Skill-first 开发流程协议
+最后修改时间: 2026-09-12 14:20:11
 
 ## Review status
 
@@ -10,7 +11,7 @@ Claude Code / Codex 已经具备足够好的代码理解、规划、实现、测
 
 sdd 不应该替代这些能力，也不应该实现新的 Agent Runtime、Workflow Engine、状态机，或一组由用户手动驱动的 CLI 流程。
 
-sdd 要解决的问题是：在使用现有 coding agent 开发功能时，缺少一个稳定、低噪声、可审查的流程协议。这个协议应帮助 Agent 和用户按阶段完成需求澄清、方案设计、实施计划、代码实现和验证，避免跳过用户确认，也避免把未讨论事项直接实现。
+sdd 要解决的问题是：在使用现有 coding agent 开发功能时，缺少一个稳定、低噪声、可审查的流程协议。这个协议应帮助 Agent 和用户按阶段完成意图澄清、方案设计、实施计划、代码实现和验证，避免跳过用户确认，也避免把未讨论事项直接实现。
 
 ## Goals
 
@@ -26,7 +27,7 @@ sdd 要解决的问题是：在使用现有 coding agent 开发功能时，缺�
 
    流程应明确分为：
 
-   - Requirement
+   - Intent
    - Spec
    - Plan
    - Implementation
@@ -34,7 +35,7 @@ sdd 要解决的问题是：在使用现有 coding agent 开发功能时，缺�
 
 4. 每个阶段都支持用户 review
 
-   Requirement、Spec、Plan 阶段都必须允许用户讨论、修改和确认。
+   Intent、Spec、Plan 阶段都必须允许用户讨论、修改和确认。
 
    默认流程应建议用户先 review 当前阶段，再进入下一阶段。但如果用户明确要求进入后续阶段，sdd skill 不应强行阻止；它应检查前置条件是否充分，提醒未确认事项、open questions 和风险，然后按用户指令开始目标阶段。
 
@@ -48,14 +49,14 @@ sdd 要解决的问题是：在使用现有 coding agent 开发功能时，缺�
 
    每个 feature 的过程文档使用：
 
-   - `docs/requirement/<yyyymmdd>-<feature>.md`
+   - `docs/intent/<yyyymmdd>-<feature>.md`
    - `docs/spec/<yyyymmdd>-<feature>.md`
    - `docs/plan/<yyyymmdd>-<feature>.md`
    - `docs/verification/<yyyymmdd>-<feature>.md`
 
    sdd 自身这轮改造位于 `sdd/` 包内，因此使用同一 stage 目录命名规则：
 
-   - `docs/requirement/20260609-sdd-skill-first-protocol.md`
+   - `docs/intent/20260609-sdd-skill-first-protocol.md`
    - `docs/spec/20260609-sdd-skill-first-protocol.md`
    - `docs/plan/20260609-sdd-skill-first-protocol.md`
    - `docs/verification/20260609-sdd-skill-first-protocol.md`
@@ -68,7 +69,7 @@ sdd 要解决的问题是：在使用现有 coding agent 开发功能时，缺�
 
 1. 不实现新的 Agent Runtime
 
-   不构建 Planner、Executor、Workflow Engine、Task Graph、Checkpoint、Session Runtime 等系统。
+   不构建 Planner、Executor、Workflow Engine、Intent Graph、Checkpoint、Session Runtime 等系统。
 
 2. 不替代 Claude Code / Codex
 
@@ -112,24 +113,24 @@ sdd next ...
 sdd mark ...
 ```
 
-### Requirement phase
+### Intent phase
 
-Skill 应进入 Requirement 阶段：
+Skill 应进入 Intent 阶段：
 
-- 只澄清需求
+- 只澄清意图
 - 不写 spec
 - 不写 plan
 - 不改代码
 - 识别 open questions
-- 与用户讨论并更新 `requirement.md`
+- 与用户讨论并更新 `intent.md`
 
 完成 draft 后，skill 应请求用户 review。
 
-默认情况下，skill 应建议先确认 Requirement 再进入 Spec。如果用户明确要求直接进入 Spec，skill 应先说明 requirement 尚未确认、列出 open questions 或风险，然后继续开始 Spec 阶段。
+默认情况下，skill 应建议先确认 Intent 再进入 Spec。如果用户明确要求直接进入 Spec，skill 应先说明 intent 尚未确认、列出 open questions 或风险，然后继续开始 Spec 阶段。
 
 ### Spec phase
 
-Skill 基于 `requirement.md` 进入 Spec 阶段：
+Skill 基于 `intent.md` 进入 Spec 阶段：
 
 - 设计技术方案
 - 讨论技术不确定项
@@ -138,7 +139,7 @@ Skill 基于 `requirement.md` 进入 Spec 阶段：
 - 不写 plan
 - 不改代码
 
-如果 Requirement 尚未确认，skill 应在开始 Spec 前明确提示这一点，并把相关待定事项作为风险或假设记录到 `spec.md`。
+如果 Intent 尚未确认，skill 应在开始 Spec 前明确提示这一点，并把相关待定事项作为风险或假设记录到 `spec.md`。
 
 完成 draft 后，skill 应请求用户 review。
 
@@ -146,7 +147,7 @@ Skill 基于 `requirement.md` 进入 Spec 阶段：
 
 ### Plan phase
 
-Skill 基于 `requirement.md` 和 `spec.md` 进入 Plan 阶段：
+Skill 基于 `intent.md` 和 `spec.md` 进入 Plan 阶段：
 
 - 制定实施步骤
 - 明确风险
@@ -163,7 +164,7 @@ Skill 基于 `requirement.md` 和 `spec.md` 进入 Plan 阶段：
 
 ### Implementation phase
 
-Skill 基于已有 requirement/spec/plan 允许 Claude Code / Codex 正常实现。
+Skill 基于已有 intent/spec/plan 允许 Claude Code / Codex 正常实现。
 
 如果 Plan 尚未确认但用户明确要求实现，skill 应提示风险后继续。
 
@@ -173,16 +174,16 @@ Skill 基于已有 requirement/spec/plan 允许 Claude Code / Codex 正常实现
 
 默认流程下，实现完成后，skill 停留在 Implementation 阶段，汇报实际改动、未运行检查、已知风险和可能偏离范围；用户人工验收并明确要求开始 Verification 后，skill 进入 Verification 阶段。如果用户明确要求连续完成实现和验证，skill 可在先汇报实现结果和风险后继续进入 Verification：
 
-- 对照 requirement 检查目标是否满足
+- 对照 intent 检查目标是否满足
 - 对照 spec 检查设计是否一致
 - 对照 plan 检查是否按计划实施
 - 汇总测试结果
 - 记录风险和未完成项
 - 写入 `verification.md`
 
-## Document requirements
+## Document conventions
 
-### Common requirements
+### Common conventions
 
 每个阶段文档应包含：
 
@@ -201,7 +202,7 @@ Accepted
 
 风险、假设、阻塞项应写入对应章节，不通过额外状态表达。
 
-### `requirement.md`
+### `intent.md`
 
 必须包含：
 
@@ -219,7 +220,7 @@ Accepted
 
 必须包含：
 
-- Requirement basis
+- Intent basis
 - Overview
 - Design decisions
 - Affected files / components
@@ -234,7 +235,7 @@ Accepted
 
 必须包含：
 
-- Requirement basis
+- Intent basis
 - Spec basis
 - Implementation steps
 - Files to change
@@ -248,7 +249,7 @@ Accepted
 
 必须包含：
 
-- Requirement alignment
+- Intent alignment
 - Spec alignment
 - Plan alignment
 - Test results
@@ -256,7 +257,7 @@ Accepted
 - Incomplete items
 - Conclusion
 
-## Skill behavior requirements
+## Skill behavior conventions
 
 1. sdd 应主要表现为一个 skill，而不是一组用户命令。
 
@@ -264,7 +265,7 @@ Accepted
 
 3. Skill 默认应聚焦当前阶段，避免主动跳阶段。
 
-4. 如果用户明确要求进入 Spec，即使 Requirement 未确认，Skill 也可以开始 Spec；但必须先提示 Requirement 未确认、列出已知待定事项和风险。
+4. 如果用户明确要求进入 Spec，即使 Intent 未确认，Skill 也可以开始 Spec；但必须先提示 Intent 未确认、列出已知待定事项和风险。
 
 5. 如果用户明确要求进入 Plan，即使 Spec 未确认，Skill 也可以开始 Plan；但必须先提示 Spec 未确认、列出技术待定事项和风险。
 
@@ -280,7 +281,7 @@ Accepted
 
 11. Skill 可以在必要时建议或使用 CLI 做初始化或诊断，但 CLI 不是主流程。
 
-## CLI requirements
+## CLI conventions
 
 CLI 应保持最小化。
 
@@ -320,11 +321,11 @@ CLI 应保持最小化。
 
 2. 用户不需要手动执行一串 CLI 命令完成开发流程。
 
-3. Skill 能按 Requirement → Spec → Plan → Implementation → Verification 顺序工作。
+3. Skill 能按 Intent → Spec → Plan → Implementation → Verification 顺序工作。
 
-4. Requirement、Spec、Plan 每个阶段都支持用户 review/approve，默认流程会建议先确认再进入下一阶段。
+4. Intent、Spec、Plan 每个阶段都支持用户 review/approve，默认流程会建议先确认再进入下一阶段。
 
-5. 用户明确要求进入 Spec 时，Skill 会检查 Requirement 是否确认；若未确认，会提示待定事项和风险，然后继续开始 Spec。
+5. 用户明确要求进入 Spec 时，Skill 会检查 Intent 是否确认；若未确认，会提示待定事项和风险，然后继续开始 Spec。
 
 6. 用户明确要求进入 Plan 时，Skill 会检查 Spec 是否确认；若未确认，会提示待定事项和风险，然后继续开始 Plan。
 
