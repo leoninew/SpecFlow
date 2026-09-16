@@ -25,6 +25,10 @@ CLIENTS = ("claude", "codex", "grok")
 COMMAND_TIMEOUT_SECONDS = 120
 DEFAULT_HOME_SUFFIXES = {"claude": ".claude", "codex": ".codex", "grok": ".grok"}
 SAFE_SKILL_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
+CODEX_INVALID_MARKETPLACE = re.compile(
+    r"^- `([^`]+)` at .+: marketplace root does not contain a supported manifest$",
+    re.MULTILINE,
+)
 
 
 def configure_logging() -> None:
@@ -37,6 +41,21 @@ def configure_logging() -> None:
 
 class SyncError(RuntimeError):
     """报告预检、客户端命令或受管目录失败。"""
+
+
+class CommandError(SyncError):
+    """报告保留了 CLI 输出的非零命令退出。"""
+
+    def __init__(
+        self,
+        target: ClientTarget,
+        arguments: Sequence[str],
+        completed: subprocess.CompletedProcess[str],
+    ) -> None:
+        self.target = target
+        self.arguments = tuple(arguments)
+        self.completed = completed
+        super().__init__(command_failure_message(target, arguments, completed))
 
 
 @dataclass(frozen=True)
@@ -307,10 +326,20 @@ class CommandRunner:
                 f"{target.name} CLI timed out while running plugin command"
             ) from error
         if completed.returncode != 0:
-            raise SyncError(
-                f"{target.name} CLI failed while running {' '.join(arguments)}"
-            )
+            raise CommandError(target, arguments, completed)
         return completed
+
+
+def command_failure_message(
+    target: ClientTarget,
+    arguments: Sequence[str],
+    completed: subprocess.CompletedProcess[str],
+) -> str:
+    message = f"{target.name} CLI failed while running {' '.join(arguments)}"
+    output = "".join(value for value in (completed.stdout, completed.stderr) if value)
+    if output:
+        message = f"{message}:\n{output}"
+    return message
 
 
 def manage_plugin(
@@ -537,7 +566,9 @@ def plan_codex(
     marketplace = config.marketplaces["codex"]
     registered = exact_record(
         records(
-            runner.inspect(target, ("plugin", "marketplace", "list", "--json")),
+            inspect_codex_plugin_state(
+                target, runner, ("plugin", "marketplace", "list", "--json")
+            ),
             "marketplaces",
         ),
         "name",
@@ -565,6 +596,53 @@ def plan_codex(
         )
     )
     return ClientPlan("codex", tuple(commands), ("plugin", "list", "--json"), selector)
+
+
+def inspect_codex_plugin_state(
+    target: ClientTarget, runner: CommandRunner, arguments: tuple[str, ...]
+) -> Any:
+    try:
+        return runner.inspect(target, arguments)
+    except CommandError as error:
+        marketplaces = invalid_codex_marketplaces(error)
+        if not marketplaces:
+            raise codex_marketplace_repair_error(error) from error
+        for marketplace in marketplaces:
+            try:
+                logging.warning(
+                    "client=codex marketplace=%s action=remove reason=invalid-manifest",
+                    marketplace,
+                )
+                runner.change(
+                    target,
+                    ("plugin", "marketplace", "remove", marketplace, "--json"),
+                )
+            except CommandError as remove_error:
+                raise codex_marketplace_repair_error(
+                    remove_error, marketplace
+                ) from remove_error
+        try:
+            return runner.inspect(target, arguments)
+        except CommandError as retry_error:
+            raise codex_marketplace_repair_error(retry_error) from retry_error
+
+
+def invalid_codex_marketplaces(error: CommandError) -> tuple[str, ...]:
+    output = "".join(
+        value for value in (error.completed.stdout, error.completed.stderr) if value
+    )
+    return tuple(dict.fromkeys(CODEX_INVALID_MARKETPLACE.findall(output)))
+
+
+def codex_marketplace_repair_error(
+    error: CommandError, marketplace: str | None = None
+) -> SyncError:
+    instructions = (
+        f"Run `codex plugin marketplace remove {marketplace}` and retry."
+        if marketplace is not None
+        else "Repair the failing Codex marketplace registration and retry."
+    )
+    return SyncError(f"{error}\n{instructions}")
 
 
 def plan_grok(
@@ -622,7 +700,12 @@ def list_plugin(
     elif target.name == "codex":
         selector = f"{config.plugin_name}@{config.marketplaces['codex'].name}"
         found = codex_has_plugin(
-            records(runner.inspect(target, ("plugin", "list", "--json")), "installed"),
+            records(
+                inspect_codex_plugin_state(
+                    target, runner, ("plugin", "list", "--json")
+                ),
+                "installed",
+            ),
             config,
             selector,
         )
@@ -664,7 +747,8 @@ def plan_plugin_removal(
     elif target.name == "codex":
         selector = f"{config.plugin_name}@{config.marketplaces['codex'].name}"
         installed = records(
-            runner.inspect(target, ("plugin", "list", "--json")), "installed"
+            inspect_codex_plugin_state(target, runner, ("plugin", "list", "--json")),
+            "installed",
         )
         commands = (
             (
@@ -797,7 +881,11 @@ def verify_plugin(
     runner: CommandRunner,
     expected: bool,
 ) -> None:
-    payload = runner.inspect(target, plan.verification)
+    payload = (
+        inspect_codex_plugin_state(target, runner, plan.verification)
+        if target.name == "codex"
+        else runner.inspect(target, plan.verification)
+    )
     if target.name == "claude":
         found = has_field_value(records(payload, "plugins"), "id", plan.selector)
     elif target.name == "codex":
