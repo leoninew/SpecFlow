@@ -119,6 +119,48 @@ jobs:
           "$check_python" -c "import importlib; importlib.import_module('$PACKAGE_IMPORT')"
           "$check_dir/bin/$RELEASE_COMMAND" --help >/dev/null
 
+          work_dir="$RUNNER_TEMP/wheel-work"
+          mkdir -p "$work_dir"
+          cd "$work_dir"
+          "$check_dir/bin/$RELEASE_COMMAND" init
+          "$check_python" - <<'PY'
+          import os
+          import pathlib
+          import subprocess
+          import sys
+
+          templates = pathlib.Path(".specflow/template")
+          expected = {"intent.md", "plan.md", "verification.md", "task.md", "handoff.md"}
+          if {path.name for path in templates.iterdir()} != expected:
+              raise SystemExit("wheel init did not produce exactly five workflow templates")
+          original = {path.name: path.read_bytes() for path in templates.iterdir()}
+          if not all(original.values()):
+              raise SystemExit("wheel contains an empty template")
+
+          suffix = ".exe" if os.name == "nt" else ""
+          command = pathlib.Path(sys.executable).with_name(os.environ["RELEASE_COMMAND"] + suffix)
+          subprocess.run([str(command), "init"], check=True)
+          if {path.name: path.read_bytes() for path in templates.iterdir()} != original:
+              raise SystemExit("repeated init modified existing templates")
+
+          for stage in ("intent", "plan", "verification"):
+              document = pathlib.Path("docs", stage, "wheel-smoke.md")
+              document.parent.mkdir(parents=True, exist_ok=True)
+              document.write_bytes(original[stage + ".md"])
+          output = subprocess.run(
+              [str(command), "status"], check=True, capture_output=True, text=True
+          ).stdout
+          expected_status = (
+              "docs/wheel-smoke:\n"
+              "  intent       Draft\n"
+              "  plan         Draft\n"
+              "  verification Draft\n"
+          )
+          if output != expected_status:
+              raise SystemExit(f"unexpected wheel status output: {output!r}")
+          print("wheel init/status passed outside the repository")
+          PY
+
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ env.PROJECT_NAME }}-wheel-${{ env.RELEASE_TAG }}

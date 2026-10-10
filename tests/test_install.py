@@ -15,6 +15,26 @@ sys.modules[SPEC.name] = install
 SPEC.loader.exec_module(install)
 
 
+def test_configured_plugin_includes_workflow_resources() -> None:
+    release = install.configured_release()
+    assert release.skill is None
+    assert len(release.plugins) == 1
+    plugin = release.plugins[0]
+    install.validate_plugin_sources(plugin, ("claude", "codex", "grok"))
+
+    skill = plugin.package / "skills" / "specflow"
+    for resource in (
+        "SKILL.md",
+        "references/task-coordination.md",
+        "template/intent.md",
+        "template/plan.md",
+        "template/verification.md",
+        "template/task.md",
+        "template/handoff.md",
+    ):
+        assert (skill / resource).is_file(), resource
+
+
 def test_command_failure_message_includes_stdout_and_stderr() -> None:
     completed = subprocess.CompletedProcess(
         ["claude", "plugin", "list", "--json"],

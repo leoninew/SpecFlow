@@ -4,21 +4,26 @@
 
 [English README](README.md)
 
-SpecFlow 为 coding agent 提供轻量、可审查的软件变更流程。它定义阶段边界和文档约定；它不替代负责读代码、改文件、跑测试或做 review 的 agent runtime。
+SpecFlow 为 coding agent 提供可审查的软件变更流程：明确意图、制定计划、实施变更并验证结果。agent 负责实际开发，SpecFlow 定义文档、阶段边界和协作规则。
 
-## 流程模式
+## 统一流程
 
-![SpecFlow 开发流程模式](docs/assets/specflow-flow-models.jpg)
+所有任务都经过意图、计划、实现、验证四个阶段：
 
-- 严格：适合意图尚不明确、跨模块或高风险变更。
-- 标准：适合普通功能开发。
-- 轻量：适合范围明确的小改动。
+```mermaid
+flowchart LR
+    I[Intent] --> P[Plan]
+    P --> D[Implementation]
+    D --> V[Verification]
+```
 
-每种模式都保留足够的过程记录，方便人类和后续 agent 审查“改了什么”和“为什么改”。
+复杂度只决定是否增加 task 文档。小任务保留意图、计划和验证记录，内容简明填写；大任务共享这些父级文档，每个子任务增加一份 task。技术设计写在计划或对应 task 中。
+
+agent 会评估交付结果、职责影响、未知项、检查范围、审查上下文和协调成本。每个子任务应有一个主要结果、明确范围和可检查的验收要求。文件数、代码行数和预计时间只作提醒，不作为统一拆分硬阈值。高风险的小改动可以加强设计与检查；影响边界的方案尚未明确时，可以先安排调查任务。
 
 ## 安装
 
-SpecFlow 使用标准 Python 打包元数据，并提供 `Makefile` 作为常用开发命令入口。这些 target 使用 `uv` 执行依赖管理相关命令。
+从仓库开发需要 Python 3.12+、`uv`、GNU Make 和 bash。Windows 可使用提供 Make 与 bash 的 Cygwin 等环境。
 
 同步锁定的开发依赖：
 
@@ -32,102 +37,137 @@ make deps
 make install
 ```
 
-SpecFlow 的原生 plugin 包内 skill 位于 `plugins/specflow/skills/specflow/`。`install` target
-会通过 Claude Code、Codex 或 Grok Build 的本地 plugin 机制完成预检和同步。
+原生 plugin 的 skill、模板和协作参考位于 `plugins/specflow/skills/specflow/`。`install` target 通过 Claude Code、Codex 或 Grok Build 的本地 plugin 机制完成预检和同步。
+
+也可以从构建出的 wheel 安装 CLI。将路径和版本替换为实际 wheel：
+
+```bash
+uv tool install "/path/to/specflow-<version>-py3-none-any.whl"
+```
+
+wheel 包含 CLI 使用的五份文档模板。原生 agent plugin 的同步另由仓库的 `make install` target 处理。
 
 ## 使用
 
-SpecFlow 的主要入口是 coding agent 的 skill（例如 Claude Code 中的 `/specflow`），不是 CLI。CLI 只用于初始化和诊断。
+从 [coding-agent skill](plugins/specflow/skills/specflow/SKILL.md) 开始，例如 Claude Code 中的 `/specflow`。用自然语言说明需要的变更和希望进入的阶段。
 
-当一段讨论已经准备进入可追踪的软件变更时，告诉 agent：使用哪个流程模式，以及从哪个阶段开始。
+### 明确意图并制定计划
 
-### 选择流程模式
-
-- 严格：适合意图尚不明确、跨模块或高风险变更。流程为：意图 → 规格 → 计划 → 实现 → 验证。
-- 标准：适合普通功能开发。流程为：意图 → 计划 → 实现 → 验证。
-- 轻量：适合范围明确的小改动。流程为：意图 → 实现 → 验证。
-
-轻量模式也会保留经过适中澄清的意图和验证记录，避免变成没有过程记录的直接改代码或极简验收备注。
-
-### 启动方式
-
-先用自然语言和 agent 讨论意图，澄清目标、约束、示例和边界情况。准备进入流程时，再启动 `/specflow`。agent 会创建或更新对应阶段文档，请你审查。阶段文档使用 `Draft` 和 `Accepted` 两种状态。
-
-启动严格模式，并从意图开始：
+先讨论目标、约束、示例和边界情况。准备好后开始意图：
 
 ```text
-使用 /specflow 严格模式：为日志文件保留 7 天，开始 Intent。
+使用 /specflow：新增报表导出功能。开始 Intent，并评估是否需要拆分 task。
 ```
 
-启动标准模式，并从意图开始：
+agent 记录意图、工作量评估以及候选任务和依赖，并指出假设、风险和未决问题。只要求开始意图时，先形成意图草稿供审查；后续阶段按你的授权推进。
 
-```text
-使用 /specflow 标准模式：新增导出报表功能，开始 Intent。
-```
-
-启动轻量模式，处理范围明确的小改动，并从意图开始：
-
-```text
-使用 /specflow 轻量模式：统一所有模态窗的取消和确认按钮顺序，开始 Intent。
-```
-
-在意图阶段，如果仍有假设、风险或未决问题，agent 会在阶段文档和回复中明确列出。只要你仍然要求继续，SpecFlow 会把这些内容记录为风险或假设，然后推进到目标阶段。启动 light / 轻量模式并从 Intent / 意图开始时，agent 只应创建或更新意图草稿并请求审查；不要在同一轮直接实现或验证。
-
-### 推进阶段
-
-审查时直接用自然语言回复即可。你不需要输入 `next`、`approve` 这类命令式跳转；只要说明要调整什么，或要进入哪个阶段。
-
-接受当前意图，并开始规格：
-
-```text
-可以，开始 Spec。
-```
-
-接受当前意图，并开始计划：
+接受意图并开始计划：
 
 ```text
 接受，开始 Plan。
 ```
 
-接受前置阶段，进入实现，并在已接受范围内完成改动：
+计划记录技术选择、实施步骤、修改文件和检查方式。需要拆分时，主会话同时建立子任务文档、依赖图（DAG）、任务定义表和执行登记表。总计划成为可执行依赖与任务分配的权威来源。
+
+### 实施
+
+接受计划并开始实现：
 
 ```text
 确认，开始 Implementation。
 ```
 
-### 交付阶段
+已拆分的任务也可以明确指定节点：
 
-默认情况下，实现完成后先人工查看实现摘要、实际 diff、未运行检查、风险和可能的范围偏离。确认可以验收后，再明确要求 agent 进入 Verification：
+```text
+在当前会话开始 T01。
+```
+
+接受总计划时，其覆盖的子任务方案一并接受；实际执行仍以你授权的任务范围和阶段为准。agent 沿用已有授权并记录剩余假设，不反复索取相同确认。
+
+### 跨会话协作
+
+一个主会话负责整理拆分并审查交付。默认由它输出提示词，你将提示词粘贴到独立可见会话，随时查看进展并直接与执行者交流。你明确选择子 agent 时，也使用相同规则。
+
+例如，报表导出功能可以采用以下 DAG；箭头表示后一个任务需要前一个任务的交付：
+
+```mermaid
+flowchart LR
+    T01["T01：导出契约"] --> T02["T02：导出服务"]
+    T01 --> T03["T03：导出界面"]
+    T02 --> T04["T04：集成检查"]
+    T03 --> T04
+```
+
+分配 T02 或 T03 前，主会话核对 T01 已交付约定结果，必要检查通过或有明确的不适用依据，交付已被审查接受，且版本可用于下游工作基线。每个任务自身还需方案已接受、执行获授权、尚未分配、没有未解决冲突。提交待审查或执行者自报完成都不足以放行。
+
+条件满足后，可以要求交接：
+
+```text
+将 T02 分配给 export-service-session，生成可复制到其他会话的提示词，仅授权 Implementation。
+```
+
+主会话先登记执行者、唯一分配编号、方案修订、基线和授权范围，再输出提示词。只要求提示词时，完成登记和提示词即可，不会自动启动会话或子 agent。
+
+1. 将提示词粘贴到选定会话。执行者核对权威计划、分配编号、前置条件和基线，在自己的 task 文档记录接收。
+2. 执行者完成授权范围，记录进展、阻塞、实际变更、交付版本、检查和风险。范围膨胀或共享契约变化时，交回主会话协调方案。
+3. 让主会话审查任务记录及实际变更。它更新执行登记，只有接受可用交付后才放行依赖。
+
+执行登记使用 `unassigned`、`assigned`、`running`、`submitted`、`accepted`，分别表示未分配、已分配、执行中、待审查、交付已接受。它们与方案的 `Draft` / `Accepted` 审查状态分别记录；交付退回返工时回到 `running`。
+
+只有主会话更新总计划中的分配和仲裁记录，执行者在各自 task 中回报。竞争请求由主会话顺序处理。这是依赖参与者遵守规则的单一写入者约定，Markdown 不提供原子锁或自由抢任务能力。
+
+使用多个 worktree 时，指定一处所有会话可访问的权威协调位置；分支上的计划副本不能授予新的执行权。没有依赖的任务也需检查共享文件冲突，约定隔离或串行方式以及集成责任。
+
+重新分配前，主会话核实原执行者已停止或协调剩余共享修改，撤销旧编号并保留历史。超时本身不能证明工作已停止。旧编号的迟到交付，以及受上游变更影响的下游结果，都需要重新审查。
+
+小任务可以直接引用已有意图和计划交接，写清授权阶段、范围和基线，不因交接额外建立 task 或分配表。完整字段见[协作文档契约](plugins/specflow/skills/specflow/references/task-coordination.md)和[交接提示词模板](plugins/specflow/skills/specflow/template/handoff.md)。
+
+### 验证整体结果
+
+子任务检查和交付审查用于判断依赖是否满足。整体 Verification 检查集成、有效交付版本、实际 diff 和全部父级验收标准。
+
+看过实现摘要、检查、风险和范围变化后，可以要求验证：
 
 ```text
 实现看起来可以接受，开始 Verification。
 ```
 
-如果你明确要求 agent 连续完成实现和验证，agent 可以在先展示实现摘要和验证前风险后进入 Verification。SpecFlow 不会在 Verification 前写建议 commit message，也不会自动执行 `git add`、`git commit` 或 `git push`。
+如果你授权连续完成实现和验证，agent 会先展示实现摘要与验证前风险，再进入 Verification。建议 commit message 在 Verification 后提供；Git 写操作需要你的授权。
 
 ## CLI
 
-CLI 是给 skill 使用的初始化和诊断辅助，不是用户主要入口：
+CLI 用于初始化和诊断：
 
 ```bash
 specflow init
 specflow status
 ```
 
-普通功能开发通常从 `/specflow` 开始；CLI 只用于初始化和状态诊断。
+- `init` 创建 `docs/`，将 `intent.md`、`plan.md`、`verification.md`、`task.md`、`handoff.md` 复制到 `.specflow/template/`。它补充缺失模板并保留已有文件，不自动建立功能或任务记录。
+- `status` 报告每个功能的 `intent`、`plan`、`verification` 文档，识别英文和规范双语审查标题。task 与交接提示词属于辅助文档，不作为阶段列或独立功能发现。任务分配仍在总计划中查看。
+
+保留三种既有文档布局：阶段目录、平铺的功能与阶段文件名、功能目录。发现时按此顺序选择首个包含匹配文档的布局。新文档使用下述阶段目录。
 
 ## 文档
 
-SpecFlow 按 feature 存放阶段文档：
+大小任务都共享以下父级文档：
 
 ```text
 docs/intent/<yyyymmdd>-<feature>.md
-docs/spec/<yyyymmdd>-<feature>.md
 docs/plan/<yyyymmdd>-<feature>.md
 docs/verification/<yyyymmdd>-<feature>.md
 ```
 
-新文档只使用两种审查状态：`Draft` 和 `Accepted`。
+需要拆分时增加：
+
+```text
+docs/task/<yyyymmdd>-<feature>/<task-id>-<topic>.md
+```
+
+每个 task 记录局部设计、实施安排、接收与进展、检查和交付证据，沿用父级流程，不重新建立整套阶段文档。总计划通过稳定 ID 关联任务，维护权威依赖与分配。
+
+新方案只使用 `Draft` 和 `Accepted`。已有 `docs/spec` 记录、旧 `spec.md` 模板和定制文件作为历史资料保留；新任务的技术设计写在计划或 task 中。重复运行 `init` 不会迁移已有模板，更新旧定制时应对照当前[模板](plugins/specflow/skills/specflow/template)审查调整。
 
 ## 开发
 
@@ -149,6 +189,8 @@ make test cov=1
 ```bash
 make release
 ```
+
+发布 workflow 还会在隔离环境安装 wheel，并在仓库外检查 `init` 与 `status`，验证包内模板可用。
 
 ## 许可证
 

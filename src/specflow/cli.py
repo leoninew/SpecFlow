@@ -2,10 +2,12 @@ import argparse
 import re
 from collections.abc import Sequence
 from datetime import datetime
+from importlib.resources import files
 from pathlib import Path
 
-PROTOCOL_FILES = ("intent.md", "spec.md", "plan.md", "verification.md")
+PROTOCOL_FILES = ("intent.md", "plan.md", "verification.md")
 PROTOCOL_STAGES = tuple(filename.removesuffix(".md") for filename in PROTOCOL_FILES)
+TEMPLATE_FILES = (*PROTOCOL_FILES, "task.md", "handoff.md")
 TEMPLATE_TIMESTAMP_PATTERN = re.compile(r"^最后修改时间: .*$", re.MULTILINE)
 
 
@@ -54,7 +56,7 @@ def init() -> None:
     docs_dir.mkdir(exist_ok=True)
     template_dir.mkdir(parents=True, exist_ok=True)
 
-    for filename in PROTOCOL_FILES:
+    for filename in TEMPLATE_FILES:
         target = template_dir / filename
         if not target.exists():
             target.write_text(_template(filename), encoding="utf-8")
@@ -129,6 +131,11 @@ def _flat_document(path: Path) -> tuple[str, str] | None:
 
 
 def _template(filename: str) -> str:
+    packaged_templates = files("specflow").joinpath("template")
+    if packaged_templates.is_dir():
+        return packaged_templates.joinpath(filename).read_text(encoding="utf-8")
+
+    # Source and editable installs read the same templates used to build the wheel.
     path = (
         Path(__file__).resolve().parents[2]
         / "plugins"
@@ -168,7 +175,10 @@ def _document_status(path: Path | None) -> str:
 def _review_status(content: str) -> str | None:
     lines = content.splitlines()
     for index, line in enumerate(lines):
-        if line.strip().lower() != "## review status":
+        if line.strip().lower() not in (
+            "## review status",
+            "## review status / 审查状态",
+        ):
             continue
 
         for candidate in lines[index + 1 :]:

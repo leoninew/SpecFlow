@@ -1,237 +1,116 @@
 ---
 name: specflow
-description: A skill-first development protocol for coding agents.
+description: Use SpecFlow to clarify intent, plan, implement, and verify a feature or change, with task decomposition and coordinated handoffs when needed.
 ---
 
 # SpecFlow
 
-当用户希望通过结构化流程开发一个功能或变更时，使用本 skill。
+当用户希望通过结构化流程开发功能或变更时，使用本 skill。SpecFlow 定义阶段、文档和交付审查；coding agent 负责实际开发，用户决定如何安排执行会话。
 
-SpecFlow is a skill-first development protocol for coding agents. 它不是 Claude Code、Codex 或任何 coding agent runtime 的替代品。coding agent 仍负责代码理解、文件修改、测试执行和 review；SpecFlow 只定义流程边界、review 节点和文档要求。
+## 语言与术语 / Language and terms
 
-## 语言
-
-说明、讨论和生成的过程文档以中文为主。命令、文件路径、代码标识符和通用技术术语在更清晰时保留英文。
-
-协议概念必须支持中英双语表达。用户使用中文或英文都应命中同一语义，例如“轻量模式”和 `light` 等价，“开始实现”和 `Implementation` 等价。
-
-## 术语别名
-
-### 流程模式 / Flow mode
-
-- `strict` / 严格 / 严格模式
-- `standard` / 标准 / 标准模式
-- `light` / 轻量 / 轻量模式
-
-### 阶段 / Stage
+说明、讨论和过程文档以中文为主。命令、路径、代码标识符和技术术语在更清晰时保留英文。中英文阶段名称表达相同语义：
 
 - `Intent` / 意图 / 意图阶段
-- `Spec` / 规格 / 方案 / 规格阶段 / 方案阶段
 - `Plan` / 计划 / 计划阶段
 - `Implementation` / 实现 / 实施 / 开始实现 / 开发
 - `Verification` / 验证 / 验收 / 验证阶段
 
-### 状态 / Review status
+文档审查状态使用 `Draft` / 草稿、`Accepted` / 接受 / 已接受 / 确认 / 通过。历史 `Approved` 可按已接受理解，不主动清理历史状态。
 
-文档中建议使用英文规范值，但识别用户语义时应支持中文：
+## 统一流程 / Workflow
 
-- `Draft` / 草稿
-- `Accepted` / 接受 / 已接受 / 确认 / 通过
+所有任务采用 Intent → Plan → Implementation → Verification。任务复杂度只决定是否增加 task 文档；技术设计写入计划或 task。小任务也有计划，内容按实际范围简明填写。
 
-新文档只写 `Draft` 或 `Accepted`。历史文档可能出现 `Approved`，可以按已接受理解，但不要主动迁移或清理历史状态。
+直接使用 coding agent 的文件读写能力维护过程文档。CLI 用于初始化和诊断，不作为阶段流转或分配任务的必经入口。
 
-## 流程模式
+## 文档与模板 / Documents and templates
 
-根据意图范围选择合适模式。不要让用户通过一串 `specflow xxx` 命令驱动流程。不要在每个阶段转换时调用 specflow CLI。优先使用 coding agent 正常的文件读写能力直接维护过程文档。
+同一功能使用相同的 `<yyyymmdd>-<feature>` 标识；日期为 8 位，例如 `20260609`。按需读取对应模板：
 
-### strict / 严格模式
+| 文档 | 项目内路径 | 模板 |
+| --- | --- | --- |
+| 意图 | `docs/intent/<yyyymmdd>-<feature>.md` | [intent.md](template/intent.md) |
+| 计划 | `docs/plan/<yyyymmdd>-<feature>.md` | [plan.md](template/plan.md) |
+| 验证 | `docs/verification/<yyyymmdd>-<feature>.md` | [verification.md](template/verification.md) |
+| 子任务，拆分时增加 | `docs/task/<yyyymmdd>-<feature>/<task-id>-<topic>.md` | [task.md](template/task.md) |
+| 交接提示词，用户要求时输出 | 不作为独立阶段文档 | [handoff.md](template/handoff.md) |
 
-适合意图尚不明确、跨模块、风险高、需要完整设计审查的变更。
+Implementation 是实际开发，不额外要求一份实现文档。小任务保留意图、计划、验证三类记录，省略任务表和 task；大任务共享父级三类记录，每个节点只有一份 task，承载局部设计、实施安排、进展、检查和交付。
 
-流程：
+创建或修改过程文档时，大标题下一行保留 `最后修改时间: <yyyy-MM-dd HH:mm:ss>`，写入本次修改的当前时间。项目已有定制模板可以沿用，但需符合当前文档契约；缺少模板时可从本 skill 读取。
 
-1. Intent / 意图
-2. Spec / 规格
-3. Plan / 计划
-4. Implementation / 实现
-5. Verification / 验证
+历史 `docs/spec`、旧模板和旧模式字段作为历史资料保留，不参与新流程选择。技术设计不再形成独立 Spec 阶段，不批量改写或删除历史资料。
 
-### standard / 标准模式
+用户要求“新的意图”“开始意图”或“新 feature”时，默认新建意图文档；要求“更新现有意图”“继续上次”或明确指定文档时沿用。无法从上下文判断新建还是沿用时再澄清，避免修改相邻或同名相近的其他功能文档。
 
-适合普通功能或中等复杂度变更。
+## 审查状态与阶段授权 / Review and authorization
 
-流程：
+阶段文档和 task 方案只使用 `Draft` / `Accepted`。风险、假设和阻塞写入对应章节。任务执行情况由总计划单独登记，方案 `Accepted` 不表示实现交付已接受。
 
-1. Intent / 意图
-2. Plan / 计划
-3. Implementation / 实现
-4. Verification / 验证
-
-### light / 轻量模式
-
-适合范围明确的小修小改或简单 bugfix。
-
-流程：
-
-1. Intent / 意图
-2. Implementation / 实现
-3. Verification / 验证
-
-light / 轻量模式必须保留适中澄清的 intent / 意图和接近 standard / 标准模式的 verification / 验证；不得退化为直接实现或极简验收记录。
-
-## 文档位置
-
-使用 feature-specific stage 目录文档：
-
-- `docs/intent/<yyyymmdd>-<feature>.md`
-- `docs/spec/<yyyymmdd>-<feature>.md`
-- `docs/plan/<yyyymmdd>-<feature>.md`
-- `docs/verification/<yyyymmdd>-<feature>.md`
-
-同一功能的 intent/spec/plan/verification 使用相同 `<yyyymmdd>-<feature>.md` 文件名，分别放在对应 stage 目录下。`<yyyymmdd>` 使用 8 位日期格式，例如 `20260609`；`<feature>` 用于表达意图或功能主题。
-
-创建或修改 `docs/` 阶段文档时，大标题下一行必须保留 `最后修改时间: <yyyy-MM-dd HH:mm:ss>`，并写为本次创建或修改的当前时间。
-
-standard / 标准模式可以不创建 `spec.md`。light / 轻量模式可以只创建经过适中澄清的 intent / 意图和 `verification.md`；轻量意图仍写在 `docs/intent/<yyyymmdd>-<feature>.md` 中。
-
-## 文档隔离
-
-用户表达“新的意图”、“开始意图”或“新 feature”等类似语义时，默认创建新的 `docs/intent/<yyyymmdd>-<feature>.md` 文档。
-
-不要修改相邻、同名相近或历史 feature 文档，除非用户明确说：
-
-- 沿用现有文档
-- 更新现有意图
-- 继续上次
-- 修改这个 intent / spec / plan / verification
-
-如果不确定是新建还是沿用，先询问用户。
-
-## Review status / 审查状态
-
-阶段文档只使用两种状态：
-
-- `Draft` / 草稿：阶段内容仍在形成中，或尚未被用户接受。
-- `Accepted` / 接受：用户已接受该阶段内容，或用户明确要求进入后一阶段。
-
-不要引入 `Approved`、`Blocked`、`Completed`、`Proceeded with assumptions` 等额外状态。风险、假设、阻塞项应写进对应章节，而不是扩展状态枚举。
-
-## 阶段流转规则
-
-- 始终告诉用户当前阶段和当前流程模式，优先使用“中文 + 英文”的形式，例如“当前：轻量模式 / light，意图 / Intent”。
-- 默认聚焦当前阶段，直到用户接受或要求进入下一阶段。
-- 用户明确确认当前阶段时，将当前阶段文档 `Review status` 更新为 `Accepted`。
-- 用户明确要求进入后一阶段时，视为接受前一阶段；先将前一阶段文档 `Review status` 更新为 `Accepted`，再进入目标阶段。
-- “确认”、“通过”、“接受”、“进入 spec / 进入规格”、“开始 plan / 开始计划”、“开始实现”、“继续下一阶段”等表达，都表示接受当前/前一阶段。
-- 如果前置阶段有 open questions、risks 或 assumptions，但用户仍要求继续，记录这些事项并进入目标阶段，不要反复要求用户确认。
-- 如果当前阶段存在必须由用户决定的不确定事项，先询问用户；如果用户选择继续推进，把不确定事项记录为 risk 或 assumption。
-- 阶段边界是默认硬边界。除非用户在当前消息中明确要求跨越多个阶段，否则一次回复只处理当前阶段，不要把 Intent / 意图、Implementation / 实现和 Verification / 验证连跑。
-- 默认流程下，Implementation / 实现完成后先停在实现阶段：汇报实现结果、实际 diff、已知风险、未运行检查和可能偏离范围，等待用户人工验收并明确要求开始 Verification / 验证。
-- 如果用户在当前消息中明确要求连续完成实现和验证（例如“实现并验证”“实现后验证”“跑完整流程”），才可以在实现完成后继续进入 Verification / 验证；进入前仍必须先输出实现摘要和验证前风险，并在回复中清楚标记从 Implementation / 实现切换到 Verification / 验证。
-- 当用户说“使用 light / 轻量模式，开始 Intent / 意图”或类似表达时，只创建或更新 intent 草稿并请求 review；不要在同一轮写产品代码、运行验证或创建 verification。
-- light / 轻量模式仍需要分阶段推进：Intent 被用户接受或用户明确要求开始实现后，才能进入 Implementation；默认在 Implementation 完成后等待用户人工验收并明确要求进入 Verification / 验证。
+- 向用户说明当前阶段；用户接受当前阶段，或明确要求进入后一阶段时，更新相应前置文档为 `Accepted`，再推进。
+- 总计划被接受时，同步接受其覆盖的 task 方案；这不自动授权执行所有节点。
+- 依据会话中仍有效的用户授权确定阶段和任务范围。用户已要求继续时，记录仍存在的风险或假设，不重复索取同一授权；必须由用户决定且影响当前工作的未决事项才需澄清。
+- 默认聚焦当前阶段。用户明确要求连续完成多个阶段时，先完成所需前置记录，再按授权推进；统一流程不因任务小而省略计划。
+- 只要求开始 Intent 时，整理意图并交付审查。用户已要求开始实现而意图或计划缺失时，先依据现有信息补齐必要记录，按已有授权推进；不能把缺文档当作跳过计划的理由。
+- Implementation 内可以执行必要开发检查和子任务交付审查。默认完成实现后汇报实际变更、检查、风险和范围偏差，等待用户要求进入整体 Verification。
+- 用户已授权连续实现和验证时，在切换前先输出实现摘要与验证前风险，并明确进入 Verification。生成交接提示词本身不授予执行、Git 写入或发布等额外权限。
 
 ## Intent / 意图阶段
 
-澄清要做什么和为什么做。所有流程模式都使用 Intent / 意图这一概念；light / 轻量模式采用适中澄清策略，但不向用户引入额外的阶段概念。
+明确做什么、为什么做以及如何判断结果。
 
-职责：
-
-1. 创建或更新 `docs/intent/<yyyymmdd>-<feature>.md`。
-2. strict / 严格模式和 standard / 标准模式捕获 background、goals、non-goals、user scenarios、acceptance criteria、open questions、decisions 和 user review notes。
-3. light / 轻量模式采用适中澄清策略，至少记录目标、非目标、验收标准、风险/假设；必要时也记录背景、场景、待定问题、决策和用户审查记录，但仍称为 Intent / 意图。
-4. 除非用户明确要求推进，否则不写 spec、plan 或产品代码。
-5. draft 完成后请求用户 review intent；如果用户要求进入后一阶段，自动将 intent 标记为 `Accepted`。
-6. 向用户展示 intent / 意图草稿时，除了总结已确认的意图，还必须显式提示仍需要用户关注的未决事项。这些事项包括但不限于：尚未确认的假设、影响方案选择的决策点、范围边界不清之处、验收标准中的模糊点、依赖外部条件的风险，以及可以继续推进但需要后续确认的问题。如果没有这类事项，应明确说明“暂无需要用户确认的未决事项”。
-
-## Spec / 规格阶段
-
-设计如何落实意图。strict / 严格模式使用该阶段；standard / 标准模式和 light / 轻量模式通常跳过。
-
-职责：
-
-1. 读取 `docs/intent/<yyyymmdd>-<feature>.md`。
-2. 创建或更新 `docs/spec/<yyyymmdd>-<feature>.md`。
-3. 捕获 intent basis、overview、design decisions、affected components、interfaces、technical questions、risks、alternatives 和 user review notes。
-4. 如果 Intent 不是 `Accepted`，但用户要求进入 Spec / 规格，则先将 Intent 标记为 `Accepted`。
-5. 除非用户明确要求推进，否则不写 plan 或产品代码。
+1. 使用意图模板创建或更新本功能文档，记录背景、目标、非目标、场景、可检查的验收、待定问题、决策、风险和用户审查记录。小任务可简明填写，不适用的内容注明原因。
+2. 基于仓库事实评估主要交付、职责与影响范围、关键未知项、检查范围、review 所需上下文，以及拆分后的耦合与共享修改。分别说明工作量、复杂度和风险，给出保持单任务或建立 task 的依据。
+3. 每个候选节点应有一个主要交付结果、明确范围、输入输出和可检查验收。多个可分别交付的结果通常拆开；影响边界的方案尚不明确时，可先安排调查或设计节点。文件数、行数和预计时间仅作提醒；高风险的小改动可以加强设计与检查，不必增加节点。
+4. 需要拆分时，在意图中说明候选任务、初始依赖及理由、验收归属。此时不登记分配；进入 Plan 后，总计划维护可执行 DAG。拆分过粗、无法独立说明输入输出或协调成本过高时，调整边界。
+5. 交付意图时指出需要用户关注的未决事项；没有时明确说明“暂无需要用户确认的未决事项”。按已有授权请求审查或进入下一阶段。
 
 ## Plan / 计划阶段
 
-定义实施步骤和验证方式。strict / 严格模式和 standard / 标准模式使用该阶段。
+确定技术选择、实施顺序、修改范围和检查方式。
 
-职责：
+1. 读取意图，使用计划模板记录技术设计、接口与数据约束、关键选择及理由、实施步骤、预期文件、检查、风险和回滚安排。用户明确进入 Plan 时接受前置意图。
+2. 无需拆分时，在计划内写清实现与检查，协调部分写“不适用”并移除占位表；不创建 task。
+3. 需要拆分时，由主会话读取[子任务协作文档契约](references/task-coordination.md)，建立固定任务定义表、执行登记表，以及每个节点的 task。局部设计和实施步骤写在相应 task，共享决策留在总计划。
+4. 以任务定义表作为依赖的唯一来源，写明每条直接依赖需要的产物和版本条件，核对标识唯一、文档与引用有效、无自依赖、无环及总体验收归属。DAG 图与执行批次表达同一组依赖。
+5. 明确共享修改、隔离或串行安排，以及集成和总体验收的负责人。无依赖不意味着能够同时写同一文件或契约。
+6. 方案被接受后才依照授权进入实施；计划和 task 不各自启动一套父级流程。仅要求整理计划时，交付计划供审查。
 
-1. 读取可用的 intent/spec 文档。
-2. 创建或更新 `docs/plan/<yyyymmdd>-<feature>.md`。
-3. 捕获 implementation steps、files to change、verification plan、blockers、assumptions、risks、rollback 和 user review notes。
-4. 如果前置 Intent 或 Spec 不是 `Accepted`，但用户要求进入 Plan / 计划，则先将对应前置文档标记为 `Accepted`。
-5. 除非用户明确要求实现，否则不写产品代码。
+## 协调与交接 / Coordination and handoff
 
-light / 轻量模式推荐意图结构：
+创建或调整 DAG、分配任务、审查交付、撤销或重新安排时，读取[子任务协作文档契约](references/task-coordination.md)。固定字段、状态含义、编号和版本规则以该文档为准。
 
-```markdown
-## Background
+主会话在同一会话内组织拆分、维护权威总计划并仲裁交付。用户要求交接后，默认输出可复制到独立可见会话的提示词；用户明确选择子 agent 时使用相同记录。主会话直接实施节点时也登记分配和交付。
 
-## Goal
+无 task 的小任务可直接引用总意图与计划交接，明确范围、阶段和基线，不为交接额外建立 task 或分配表。以下分配与仲裁登记适用于已拆分的任务。
 
-## Non-goal
+派发前核对方案已接受、用户授权覆盖当前任务和阶段、任务未分配，并且所有直接前置交付已实现或产出、必要检查通过或明确不适用、主会话已接受、版本可用于下游基线；共享写入冲突和其他阻塞也需解决。
 
-## User scenarios
+主会话先登记执行者、唯一分配编号、方案修订、实际工作基线和授权范围，再按 handoff 模板输出提示词。只要求提示词时，完成登记和提示词即可；生成提示词不自动启动新会话或子 agent。
 
-## Acceptance
+执行者核对权威位置、有效编号、方案、授权及前置版本后，在自己的 task 中记录接收、进展、阻塞和交付。总计划的分配及仲裁记录只由主会话维护；跨 worktree 的计划副本不产生新的执行权。用户可以直接与执行会话沟通，主会话按约定记录 review 结果。
 
-## Open questions
-
-## Decisions
-
-## Risk
-```
-
-如果变更确实很小，可以将无内容章节标为“不适用”，但不要跳过对目标、边界、验收和风险/假设的适中澄清。
-
+竞争请求由主会话顺序处理，单一写入者约定不提供 Markdown 原子互斥。撤销前核实原执行者已停止或协调剩余共享修改，保留旧编号与原因；超时不等于停止。旧编号迟到交付由主会话重新核对，不能自动替代当前分配的结果。
 
 ## Implementation / 实现阶段
 
-使用 coding agent 的正常能力，在已有过程约束内实现。
-
-职责：
-
-1. 读取可用的 intent/spec/plan 文档。
-2. 如果 Plan 缺失但当前是 light / 轻量模式，依据 intent / 意图实现。
-3. 将实现范围限制在用户指令和已有文档约束内。
-4. 如果代码现实与 plan 或 intent 冲突，报告冲突，并和用户一起更新过程文档，不要静默改变范围。
-5. 默认在实现完成后停止在 Implementation / 实现阶段：汇报实际改动、已运行/未运行的检查、已知风险、可能偏离范围和建议用户验收的事项；不要创建 verification 文档、不要运行验证阶段专属流程、不要输出建议 git commit message，直到用户明确要求进入 Verification / 验证。若用户在当前消息中明确要求连续完成实现和验证，先输出实现摘要和验证前风险，再进入 Verification / 验证；即使连续进入 Verification / 验证，也只有 Verification / 验证完成后才输出建议 git commit message。
+1. 读取已接受的意图和计划；有 task 时再读取本次任务文档，并核对权威登记和输入版本，在已授权范围内实施。执行者沿用父级流程与验收，不重复建立整套阶段文档。
+2. 根据改动运行必要开发检查，使用项目已有工具和入口。将实际变更、可访问版本或 diff、前置版本、检查结果、未运行项和风险记录到 task；无 task 时在计划记录实际偏差并向用户交付结果。
+3. 发现新增目标、工作量膨胀、依赖或共享契约变化时，回报主会话协调范围；由主会话更新方案、评估受影响任务，并明确继续、暂停或重新分配。上游变化后重新核对下游结果，不能沿用失效的 accepted 交付放行。
+4. 主会话查看实际变更与证据，处理返工后更新权威登记。执行者报告完成、方案 Accepted 或提交待审查，都不足以放行下游。
+5. 完成本次授权的实现后，汇报变更、已运行和未运行的检查、风险、范围偏差与待审查事项。局部检查和任务交付 review 不自动进入整体 Verification；进入条件按上述阶段授权执行。
 
 ## Verification / 验证阶段
 
-对照过程文档验证实现。
+在用户授权下对照父级意图、计划和实际交付验证整体结果，使用验证模板形成同名报告。
 
-进入条件：默认需要用户已看过 Implementation / 实现结果和验证前风险，并在实现完成后明确要求开始 Verification / 验证。若用户在当前消息中明确要求连续完成实现和验证，该请求可作为进入 Verification / 验证的授权；进入前仍必须先输出实现摘要和验证前风险。
+1. 核对目标、技术选择、验收标准及实际 diff，记录预期与实际文件差异、范围遗漏或扩大、风险与未完成事项。
+2. 有 task 时核对所有当前有效交付、前置版本、主会话审查证据与集成结果；检查上游变化是否使下游过时，以及全部验收是否有对应结果。节点各自完成不足以证明整体正确。
+3. 先识别项目语言和工具链，优先使用 README、justfile、Makefile、package scripts、CI 或语言配置中的既有检查入口；记录实际执行结果和未运行原因，不预设固定语言或框架。
+4. 报告包含意图对齐、计划对齐、任务集成（无 task 时不适用）、实际差异、预期与实际修改对比、验收清单、命令结果、范围偏差、风险、未完成项和结论。篇幅可按范围调整，结论需有证据。
+5. Verification 完成并确认交付后，在最终屏幕输出中基于实际 diff 提供建议 Git commit message；不写入验证文档，也不自动执行 Git 写操作。除非用户只要标题，否则使用代码块给出 subject、空行和列表形式的 body，描述变更意图与影响。检查结果、风险与未完成项放在交付说明中；存在无关改动、失败或未完成项时，先说明风险及需要拆分或修复的内容。
 
-职责：
+## CLI 使用 / CLI support
 
-1. 读取可用的 intent/spec/plan 文档。
-2. 对照实际 diff 检查预期范围与实际改动是否一致。
-3. 运行命令前先识别当前项目开发语言、工具链，不要预设所有项目都是 Python、uv、Node 或某种固定栈。
-4. 优先使用项目显式入口：README、justfile、Makefile、package scripts、CI 配置、语言专用配置或已有测试/lint/format 命令。
-5. 尽可能运行或收集相关测试、lint、format 或项目约定命令结果；不要在通用协议中硬编码语言、框架或业务特定检查。
-6. 创建或更新 `docs/verification/<yyyymmdd>-<feature>.md`。
-7. strict / standard 模式记录 intent alignment、spec alignment、plan alignment、actual diff summary、expected vs actual changed files、acceptance criteria checklist、test results、missed or expanded scope、risks、incomplete items 和 conclusion。
-8. Verification / 验证完成并确认交付时，在最终屏幕输出中基于实际 diff 提供建议 git commit message，帮助用户审视交付边界；该建议不写入 `verification.md`，也不代表自动提交。
-9. 建议 git commit message 应是完整提交信息，不只是单行标题。除非用户明确要求 title-only，否则使用 fenced code block 输出，至少包含 subject、空行和 body；body 必须用列表形式输出，但应面向 git 历史说明本次提交的变更意图和影响，而不是复述 verification 过程；每条描述一个有意义的改动、行为变化、约束或兼容性影响。验证命令结果、验收清单、风险提示、未完成项或拆分建议应放在屏幕交付说明中，不写进建议 commit body。
-10. 除非用户明确授权，不执行 `git add`、`git commit`、`git push` 等 Git 写操作。
-11. 如果当前 diff 包含无关改动、验证失败或仍有 incomplete items，应在屏幕输出 commit 建议前明确说明风险，并建议用户先拆分或修复。
-12. light / 轻量模式按 standard / 标准模式的主要验证维度记录：意图对齐、实际 diff 摘要、预期与实际改动对比、验收清单、命令结果、范围偏差、风险、未完成项和结论。没有 spec 或 plan 时，对应小节写“不适用”或“按 intent / 意图核对”。不要只写变更摘要、验收、命令和剩余风险。
-
-light / 轻量模式推荐使用完整 verification 模板；可合并明显重复的小节，但必须保留上述验证信息。
-
-
-## CLI 使用
-
-specflow CLI 只用于 setup 和 diagnostic support：
-
-- `specflow init`
-- `specflow status`
-
-不要把 CLI 命令作为主要工作流机制。
+公开命令为 `specflow init` 和 `specflow status`，用于初始化与诊断。任务表、DAG、可分配条件和交付质量由主会话按契约核对，状态输出不代替语义审查。

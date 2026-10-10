@@ -4,21 +4,26 @@
 
 [中文说明](README.zh-CN.md)
 
-SpecFlow gives coding agents a lightweight, reviewable process for software changes. It defines stage boundaries and document conventions; it does not replace the agent runtime that reads code, edits files, runs tests, or performs reviews.
+SpecFlow gives coding agents a reviewable process for software changes: clarify intent, plan the work, implement it, and verify the result. The agent performs the development work; SpecFlow defines the documents, stage boundaries, and coordination rules.
 
-## Flow modes
+## Workflow
 
-![SpecFlow development protocol flow models](docs/assets/specflow-flow-models.jpg)
+Every task follows the same four stages:
 
-- `strict`: for unclear, cross-module, or high-risk changes.
-- `standard`: for ordinary feature work.
-- `light`: for small, well-scoped changes.
+```mermaid
+flowchart LR
+    I[Intent] --> P[Plan]
+    P --> D[Implementation]
+    D --> V[Verification]
+```
 
-Each mode keeps enough process record for humans and future agents to review what changed and why.
+Complexity determines whether to add task documents. A small change keeps an Intent, a Plan, and a Verification record, with concise content. Larger work shares those parent documents and adds one `task` document per subtask. Technical design belongs in the plan or the relevant task.
+
+The agent assesses deliverables, affected responsibilities, unknowns, checks, review context, and coordination costs. Each subtask should have one main result, a clear scope, and checkable acceptance criteria. File counts, line counts, and estimates are signals, not universal splitting thresholds. A small but risky change may need deeper design and checks; an unresolved design choice may justify an investigation task first.
 
 ## Install
 
-SpecFlow uses standard Python packaging metadata and provides a `Makefile` for common development commands. The targets use `uv` for dependency-managed commands.
+Development from a checkout requires Python 3.12+, `uv`, GNU Make, and bash. On Windows, use an environment such as Cygwin that provides Make and bash.
 
 Sync the locked development dependencies:
 
@@ -32,103 +37,137 @@ Install the editable CLI in the user tool directory and synchronize the native p
 make install
 ```
 
-SpecFlow's native plugin package contains its skill at `plugins/specflow/skills/specflow/`. The
-`install` target checks and synchronizes it through the local Claude Code, Codex, or Grok Build
-plugin mechanism.
+The native plugin contains the skill, templates, and coordination reference under `plugins/specflow/skills/specflow/`. The `install` target checks and synchronizes the plugin through the local Claude Code, Codex, or Grok Build plugin mechanism.
+
+You can also install the CLI from a built wheel. Replace the path and version with your actual wheel:
+
+```bash
+uv tool install "/path/to/specflow-<version>-py3-none-any.whl"
+```
+
+The wheel includes the CLI's five document templates. Native agent plugin synchronization is handled separately by the repository's `make install` target.
 
 ## Use
 
-SpecFlow's primary interface is the coding-agent skill, such as `/specflow` in Claude Code, not the CLI. The CLI is only for setup and diagnostics.
+Start with the [coding-agent skill](plugins/specflow/skills/specflow/SKILL.md), such as `/specflow` in Claude Code. Use natural language to describe the change and the stage you want to enter.
 
-When a conversation is ready to become a tracked software change, tell the agent which flow mode to use and which stage to start from.
+### Clarify and plan
 
-### Choose a flow mode
-
-- `strict`: for an unclear intent, cross-module work, or high-risk changes. Flow: Intent → Spec → Plan → Implementation → Verification.
-- `standard`: for ordinary feature work. Flow: Intent → Plan → Implementation → Verification.
-- `light`: for small, clearly scoped changes. Flow: Intent → Implementation → Verification.
-
-Light mode still keeps moderately clarified Intent and Verification records. It should not become undocumented direct coding or a minimal acceptance note.
-
-### Start the flow
-
-Discuss the intent with the agent first. Clarify the goal, constraints, examples, and edge cases in normal conversation. When you are ready to enter the flow, invoke `/specflow`. The agent creates or updates the stage document and asks you to review it. Stage documents use two states: `Draft` and `Accepted`.
-
-Start strict mode from Intent:
+Discuss the goal, constraints, examples, and edge cases. When ready, start Intent:
 
 ```text
-Use /specflow strict: keep log files for 7 days, start Intent.
+Use /specflow: add report export. Start Intent and assess whether the work needs task decomposition.
 ```
 
-Start standard mode from Intent:
+The agent records the intent, workload assessment, and any candidate tasks or dependencies. It highlights assumptions, risks, and open questions. A request to start Intent produces an intent draft for review; later stages follow your authorization.
 
-```text
-Use /specflow standard: add report export, start Intent.
-```
-
-Start light mode for a small, clearly scoped change from Intent:
-
-```text
-Use /specflow light: make all modal dialogs use the same Cancel and Confirm button order, start Intent.
-```
-
-During the Intent stage, if there are assumptions, risks, or open questions, the agent lists them in the stage document and in its reply. If you still ask to continue, SpecFlow records them as risks or assumptions and moves to the target stage. When starting light mode from Intent, the agent should only create or update the intent draft and ask for review; it should not implement or verify in the same turn.
-
-### Move through stages
-
-During review, reply naturally. You do not need command-style transitions like `next` or `approve`; just say what should change, or which stage you want to enter.
-
-Accept the current intent and start Spec:
-
-```text
-Looks good, start Spec.
-```
-
-Accept the current intent and start Plan:
+Accept the intent and start Plan:
 
 ```text
 Accepted, start Plan.
 ```
 
-Accept the prerequisite stage, enter Implementation, and keep the work within the accepted scope:
+The plan records technical decisions, implementation steps, affected files, and checks. For split work, the coordinating conversation also creates the task documents, dependency graph (DAG), task definition table, and execution registry. The plan becomes the authority for executable dependencies and assignments.
+
+### Implement
+
+Accept the plan and start implementation:
 
 ```text
 Confirmed, start Implementation.
 ```
 
-### Handoff
+For split work, you can name a specific task:
 
-By default, after implementation is done, first review the implementation summary, actual diff, skipped checks, risks, and possible scope drift. Then explicitly ask the agent to enter Verification:
+```text
+Start T01 in this conversation.
+```
+
+Accepting the parent plan accepts its covered task schemes. Execution still follows the task scope and stages you authorize. The agent uses existing authorization and records remaining assumptions rather than repeatedly asking for the same approval.
+
+### Work across conversations
+
+One coordinating conversation prepares the decomposition and reviews deliveries. By default, it produces handoff prompts for you to paste into visible, independent conversations, where you can inspect progress and talk directly to the executor. Subagents use the same rules when you explicitly choose them.
+
+For example, an export feature might have this DAG; each arrow means the later task needs the earlier delivery:
+
+```mermaid
+flowchart LR
+    T01["T01: Export contract"] --> T02["T02: Export service"]
+    T01 --> T03["T03: Export UI"]
+    T02 --> T04["T04: Integration checks"]
+    T03 --> T04
+```
+
+Before assigning T02 or T03, the coordinator checks that T01's agreed work has been delivered, required checks have passed or are explicitly inapplicable, the delivery has been reviewed and accepted, and its version is available in the downstream working baseline. Each task also needs an accepted scheme, execution authorization, no existing assignment, and no unresolved conflict. A submitted delivery or an executor's completion statement is insufficient.
+
+Once these conditions are met, request a handoff:
+
+```text
+Assign T02 to export-service-session and prepare a prompt I can paste into another conversation. Authorize Implementation only.
+```
+
+The coordinator records the executor, unique assignment ID, plan revision, baseline, and authorized scope before producing the prompt. A request for a prompt produces the assignment and prompt; it does not automatically launch a conversation or subagent.
+
+1. Paste the prompt into the chosen conversation. The executor checks the authoritative plan, assignment ID, prerequisites, and baseline, then records receipt in its task document.
+2. The executor implements the assigned scope and records progress, blockers, changes, delivery version, checks, and risks. Scope growth or shared contract changes return to the coordinator for replanning.
+3. Ask the coordinator to review the task record and actual changes. It updates the execution registry and releases dependencies only after accepting the usable delivery.
+
+The registry uses `unassigned`, `assigned`, `running`, `submitted`, and `accepted`. These execution states are separate from the scheme's `Draft` / `Accepted` review status. A delivery returned for rework goes back to `running`.
+
+Only the coordinator updates assignments and arbitration in the parent plan; executors report in their own task documents. Competing requests are processed in order. This single-writer convention relies on participants following it: Markdown does not provide atomic locking or free task claiming.
+
+Across worktrees, identify one accessible authoritative coordination location. Branch copies of the plan cannot grant new assignments. Tasks with no dependency relationship still require checking shared-file conflicts and agreeing on isolation or sequencing and integration responsibility.
+
+Before reassignment, the coordinator confirms that the previous executor has stopped or resolves remaining shared work, revokes the old ID, and keeps the history. A timeout alone does not prove work has stopped. Late deliveries under an old ID and downstream results affected by upstream changes require review again.
+
+A small task can be handed off by referencing its existing intent and plan, with the authorized stage, scope, and baseline. Handoff alone does not require extra task documents or a registry. See the [coordination contract](plugins/specflow/skills/specflow/references/task-coordination.md) and [handoff template](plugins/specflow/skills/specflow/template/handoff.md) for the full fields.
+
+### Verify the whole change
+
+Task checks and delivery reviews support dependency decisions. Overall Verification checks integration, valid delivery versions, the actual diff, and all parent acceptance criteria.
+
+After reviewing the implementation summary, checks, risks, and scope changes, request Verification:
 
 ```text
 The implementation looks acceptable; start Verification.
 ```
 
-If you explicitly ask the agent to complete implementation and verification in the same request, the agent may continue into Verification after first showing the implementation summary and pre-verification risks. SpecFlow does not write a suggested commit message before Verification or run `git add`, `git commit`, or `git push`.
+If you authorize continuous implementation and verification, the agent first shows the implementation summary and pre-verification risks, then enters Verification. Suggested commit messages are provided after Verification; Git writes require your authorization.
 
 ## CLI
 
-The CLI is a setup and diagnostic helper for the skill, not the primary user interface:
+Use the CLI for setup and diagnostics:
 
 ```bash
 specflow init
 specflow status
 ```
 
-For normal feature work, start from `/specflow`; use the CLI only for setup and status diagnostics.
+- `init` creates `docs/` and copies `intent.md`, `plan.md`, `verification.md`, `task.md`, and `handoff.md` into `.specflow/template/`. It fills missing templates and preserves existing files; it does not create feature or task records.
+- `status` reports the `intent`, `plan`, and `verification` documents for each feature. It recognizes English and canonical bilingual review headings. Tasks and handoff prompts are auxiliary documents, so they are not stage columns or separately discovered features. Task assignments remain in the parent plan.
+
+The three existing document layouts remain supported: stage directories, flat feature-stage filenames, and feature directories. Discovery uses the first layout with matching documents, in that order. New documents use the stage directories below.
 
 ## Documents
 
-SpecFlow stores stage documents by feature:
+Small and large changes share these parent documents:
 
 ```text
 docs/intent/<yyyymmdd>-<feature>.md
-docs/spec/<yyyymmdd>-<feature>.md
 docs/plan/<yyyymmdd>-<feature>.md
 docs/verification/<yyyymmdd>-<feature>.md
 ```
 
-New documents use only two review states: `Draft` and `Accepted`.
+Split work additionally uses:
+
+```text
+docs/task/<yyyymmdd>-<feature>/<task-id>-<topic>.md
+```
+
+Each task contains its local design, implementation outline, receipt and progress, checks, and delivery evidence. It shares the parent workflow rather than starting another set of stage documents. The plan links tasks by stable IDs and keeps the authoritative dependencies and assignments.
+
+New schemes use only `Draft` and `Accepted`. Existing `docs/spec` records, old `spec.md` templates, and customized files are retained as historical material. New work puts technical design in the plan or task. Re-running `init` does not migrate existing templates: review older customizations against the current [templates](plugins/specflow/skills/specflow/template) when updating them.
 
 ## Development
 
@@ -150,6 +189,8 @@ Build source and wheel distributions:
 ```bash
 make release
 ```
+
+The release workflow also installs the wheel in an isolated environment and checks `init` and `status` outside the repository to verify that packaged templates are available.
 
 ## License
 
