@@ -109,11 +109,24 @@ Assign T02 to export-service-session and prepare a prompt I can paste into anoth
 
 The coordinator records the executor, unique assignment ID, plan revision, baseline, and authorized scope before producing the prompt. A request for a prompt produces the assignment and prompt; it does not automatically launch a conversation or subagent.
 
-1. Paste the prompt into the chosen conversation. The executor checks the authoritative plan, assignment ID, prerequisites, and baseline, then records receipt in its task document.
-2. The executor implements the assigned scope and records progress, blockers, changes, delivery version, checks, and risks. Scope growth or shared contract changes return to the coordinator for replanning.
-3. Ask the coordinator to review the task record and actual changes. It updates the execution registry and releases dependencies only after accepting the usable delivery.
+The handoff includes the protocol entry point, parent intent, authoritative plan and task, the source of user authorization, stage and scope, code baseline, writable reporting location, and how the coordinator will read it. The task holds the local plan; the prompt connects the actual records. A task path or an Accepted scheme alone does not establish execution authorization. Existing valid authorization carries across conversations without repeated confirmation.
 
-The registry uses `unassigned`, `assigned`, `running`, `submitted`, and `accepted`. These execution states are separate from the scheme's `Draft` / `Accepted` review status. A delivery returned for rework goes back to `running`.
+1. Paste the completed prompt into the chosen conversation. The executor checks the current assignment, authorization, prerequisite versions, and reporting location, then **writes a receipt before changing product files**, including the time, executor, assignment ID, plan revision, authorization source, and actual baseline. It outputs a receipt summary. Inaccessible or unwritable records, an invalid assignment, or conflicting authorization must be reported and resolved first.
+2. At meaningful progress points, blockers, or scope changes, the executor updates its task and modification timestamp with work done, remaining work, and matters requiring coordination. Changes to scope or shared contracts return to the coordinator; work beyond the authorized scope pauses.
+3. **Before announcing delivery, update the task document** with actual changes, acceptance results and evidence, delivery version and location, prerequisite versions, check commands and results, skipped checks and reasons, unfinished work, risks, and downstream impact. Explicitly record when there are no issues. A completion statement in chat is insufficient; if writing fails, state that the delivery record is incomplete.
+4. After receipt, when coordination is needed, and at delivery, the executor outputs a copyable summary containing the task ID, assignment ID, reported facts, record path, and requested action. By default, you relay it to the coordinator. Writing a document does not automatically notify another conversation. The coordinator reads the records and updates the registry when it receives the report or you ask it to check progress.
+
+| Facts and evidence | Execution state updated by the coordinator |
+| --- | --- |
+| A valid assignment and authorization have been recorded | `assigned` |
+| A valid receipt has been read | `running` |
+| A complete delivery record for the current assignment has been read | `submitted` |
+| Actual changes and checks have been reviewed and accepted | `accepted` |
+| The delivery requires rework | `running`, with review history preserved |
+
+The registry can lag behind reports. Once a valid receipt has been written, the executor can work within existing authorization without waiting for the coordinator to change `assigned` to `running`. On resuming coordination, the coordinator reads the latest reports and synchronizes the registry before reviewing or assigning work. A stale state cannot justify a duplicate assignment; dependencies are released only after accepting a usable delivery.
+
+Tasks without an assignment are `unassigned`. The coordinator maintains all execution states above. Executors write facts and evidence in their tasks; they do not change the registry or use the task's `Draft` / `Accepted` scheme status to indicate work starting or finishing.
 
 Only the coordinator updates assignments and arbitration in the parent plan; executors report in their own task documents. Competing requests are processed in order. This single-writer convention relies on participants following it: Markdown does not provide atomic locking or free task claiming.
 
@@ -121,7 +134,7 @@ Across worktrees, identify one accessible authoritative coordination location. B
 
 Before reassignment, the coordinator confirms that the previous executor has stopped or resolves remaining shared work, revokes the old ID, and keeps the history. A timeout alone does not prove work has stopped. Late deliveries under an old ID and downstream results affected by upstream changes require review again.
 
-A small task can be handed off by referencing its existing intent and plan, with the authorized stage, scope, and baseline. Handoff alone does not require extra task documents or a registry. See the [coordination contract](plugins/specflow/skills/specflow/references/task-coordination.md) and [handoff template](plugins/specflow/skills/specflow/template/handoff.md) for the full fields.
+A small task can be handed off by referencing its existing intent and plan, with the authorized stage, scope, and baseline. Specify writable receipt, progress, and delivery sections in the existing plan and coordinate who can edit them. The same recording and reporting steps apply before starting work or delivering it. Handoff alone does not require extra task documents or a registry; assignment IDs and task execution states are inapplicable. See the [coordination contract](plugins/specflow/skills/specflow/references/task-coordination.md) and [handoff template](plugins/specflow/skills/specflow/template/handoff.md) for the full fields.
 
 ### Verify the whole change
 
